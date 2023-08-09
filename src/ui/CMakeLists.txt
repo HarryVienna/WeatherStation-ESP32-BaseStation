@@ -1,0 +1,25 @@
+SET(SOURCES screens/ui_Screen.c
+    ui.c
+    ui_helpers.c
+    images/ui_img_09d_png.c
+    images/ui_img_cloud_png.c
+    images/ui_img_uv_png.c
+    images/ui_img_arrow_png.c
+    images/ui_img_sunrise_png.c
+    images/ui_img_sunset_png.c
+    images/ui_img_humidity_png.c
+    images/ui_img_pressure_png.c
+    images/ui_img_battery_png.c
+    images/ui_img_uhr_png.c
+    fonts/ui_font_FreeSans14.c
+    fonts/ui_font_FreeSans16.c
+    fonts/ui_font_FreeSans18.c
+    fonts/ui_font_FreeSans20.c
+    fonts/ui_font_FreeSans22.c
+    fonts/ui_font_FreeSans24.c
+    fonts/ui_font_FreeSansBold38.c
+    fonts/ui_font_FreeSansBold44.c
+    fonts/ui_font_FreeSansBold46.c
+    fonts/ui_font_FreeSansBold48.c)
+
+add_library(ui ${SOURCES})
