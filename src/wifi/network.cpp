@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <Preferences.h>
 
 #include <esp_now.h>
 
@@ -9,11 +10,6 @@
 #include "network.h"
 
 static const char* TAG = "network";
-
-extern SemaphoreHandle_t mutex;
-
-const char* ssid = "xxx";
-const char* password = "yyy";
 
 extern SemaphoreHandle_t mutex;
 
@@ -45,8 +41,14 @@ enum MessageType {
 };
 
 
-
-
+/**
+ * @brief     Print MAC address to Serial monitor
+ *
+ * @param     mac_addr  Pointer to the MAC address array
+ *
+ * @details   Formats the MAC address provided as an array of uint8_t into a string.
+ *            Prints the formatted MAC address to the Serial monitor.
+ */
 void print_mac(const uint8_t * mac_addr){
   char macStr[18];
   snprintf(macStr, sizeof(macStr), "%02x:%02x:%02x:%02x:%02x:%02x",
@@ -55,6 +57,19 @@ void print_mac(const uint8_t * mac_addr){
   Serial.println(macStr);
 }
 
+/**
+ * @brief     Add a peer for ESP-NOW communication
+ *
+ * @param     mac_addr  Pointer to the MAC address of the peer
+ * @param     chan      Channel to communicate with the peer
+ *
+ * @details   Prepares and adds a peer for ESP-NOW communication.
+ *            Deletes the existing peer with the provided MAC address if present.
+ *            Initializes peer information, sets the channel and encryption settings,
+ *            and adds the peer using ESP-NOW API.
+ *
+ * @note      The function will print an error message if adding the peer fails.
+ */
 void add_peer(const uint8_t * mac_addr, uint8_t chan){
   esp_now_peer_info_t peer;
 
@@ -70,7 +85,15 @@ void add_peer(const uint8_t * mac_addr, uint8_t chan){
   }
 }
 
-
+/**
+ * @brief     Callback function for handling data transmission status
+ *
+ * @param     mac_addr  Pointer to the MAC address of the recipient
+ * @param     status    Status of the data transmission (success or failure)
+ *
+ * @details   Prints the status of the last packet transmission to the specified MAC address.
+ *            Displays whether the delivery was successful or failed via the Serial monitor.
+ */
 void on_data_sent(const uint8_t *mac_addr, esp_now_send_status_t status) {
   Serial.print("Last Packet Send Status: ");
   Serial.print(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success to " : "Delivery Fail to ");
@@ -78,6 +101,17 @@ void on_data_sent(const uint8_t *mac_addr, esp_now_send_status_t status) {
   Serial.println();
 }
 
+/**
+ * @brief     Callback function for handling received data
+ *
+ * @param     mac_addr      Pointer to the MAC address of the sender
+ * @param     incomingData  Pointer to the received data
+ * @param     len           Length of the received data
+ *
+ * @details   Processes received data based on its type, such as sensor data or pairing requests.
+ *            Displays the received data details, including sensor information and time, if applicable.
+ *            Handles pairing requests by responding and adding peers for communication.
+ */
 void on_data_recv(const uint8_t * mac_addr, const uint8_t *incomingData, int len) {
 
   Serial.print(len);
@@ -123,7 +157,25 @@ void on_data_recv(const uint8_t * mac_addr, const uint8_t *incomingData, int len
   }
 }
 
+/**
+ * @brief     Start WiFi connection and setup time synchronization
+ *
+ * @details   Initializes WiFi connection using stored credentials.
+ *            Connects to the specified SSID using the provided password.
+ *            Configures time synchronization based on the given timezone and NTP server.
+ *            Prints the connected WiFi details to the Serial monitor.
+ */
 void wifi_start() {
+
+  Preferences preferences;
+  preferences.begin("Weatherstation", false);
+
+  String ssid = preferences.getString("ssid", ""); 
+  String password = preferences.getString("password", "");
+  String tz = preferences.getString("tz", ""); 
+
+  preferences.end();
+
   WiFi.mode(WIFI_STA);
   WiFi.setSleep(false);
   WiFi.begin(ssid, password);
@@ -135,12 +187,19 @@ void wifi_start() {
     delay(1000);
   }
 
-  configTzTime("CET-1CEST,M3.5.0,M10.5.0/3", "de.pool.ntp.org");
+  configTzTime(tz.c_str(), "de.pool.ntp.org");
 
   Serial.println(WiFi.localIP());
   Serial.println(WiFi.channel());
 }
 
+/**
+ * @brief     Start ESP-NOW communication
+ *
+ * @details   Initializes ESP-NOW communication protocol on the ESP32.
+ *            Registers callbacks for sending and receiving data.
+ *
+ */
 void esp_now_start(){
 
     if (esp_now_init() != ESP_OK) {

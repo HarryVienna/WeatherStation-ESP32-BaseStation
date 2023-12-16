@@ -17,13 +17,23 @@
 
 static const char* TAG = "brightness_task";
 
+/**
+ * @brief     Map sensor value to a corresponding brightness level
+ *
+ * @param     value   Sensor value to be mapped to brightness
+ *
+ * @return    uint8_t The mapped brightness level (4-255 range)
+ *
+ * @details   Maps sensor values within a specified range to corresponding brightness levels.
+ *            Uses logarithmic scaling to convert sensor values to a suitable brightness scale.
+ */
 uint8_t map_brightness(float value) {
   
   const float adc_from = 800;   // Values from ADC 800 = very bright, 4000 = very dark
   const float adc_to   = 4000;  
 
   const float brightness_from = log(255);   // Brightness levels
-  const float brightness_to   = log(8);
+  const float brightness_to   = log(4);
 
   if (value < adc_from) {
     value = adc_from;
@@ -41,8 +51,13 @@ uint8_t map_brightness(float value) {
 
 
 /**
- * @brief Main task for controling the hands 
+ * @brief     Task for adjusting brightness based on sensor readings
  *
+ * @param     pvParameter   Pointer to task parameters (not used in this function)
+ *
+ * @details   Monitors sensor values and adjusts brightness levels accordingly.
+ *            Uses hysteresis thresholds to control smooth transitions in brightness changes.
+ *            Implements a loop to continuously monitor and update brightness levels.
  */
 void brightness_task(void *pvParameter){
 
@@ -60,7 +75,7 @@ void brightness_task(void *pvParameter){
     target_brightness = map_brightness(sensorVal);
     //log_i("%d %d", current_brightness, target_brightness);
   
-    int8_t brightness_difference = target_brightness - current_brightness;
+    int16_t brightness_difference = target_brightness - current_brightness;
 
     if (abs(brightness_difference) >= threshold) {
       int direction = (brightness_difference > 0) ? 1 : -1;

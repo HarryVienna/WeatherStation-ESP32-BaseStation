@@ -24,9 +24,6 @@
 #define COLOR_GREY 0x2E2E2E
 #define COLOR_BLACK 0x000000
 
-#define HEIGHT_ABOVE_SEALEVEL 210 
-
 static const char* DAY_NAMES[7] = { "So", "Mo", "Di", "Mi" , "Do" , "Fr" , "Sa" };
-
 
 #endif

@@ -25,8 +25,12 @@ extern SemaphoreHandle_t mutex;
 
 
 /**
- * @brief Main task for sensors
+ * @brief     Task for reading sensor data and displaying information
  *
+ * @param     pvParameter   Pointer to task parameters (not used in this function)
+ *
+ * @details   Initializes and reads data from two sensors (SEN55 and SCD41).
+ *            Monitors and retrieves sensor measurements, displaying them periodically.
  */
 void sensor_task(void *pvParameter){
 

@@ -4,13 +4,9 @@
 #include <lvgl.h>
 #include <mutex>
 #include "config/config.h"
-#include "wifi/network.h"
 #include "openweather/openweatherapi.h"
 #include "gui/gui.h"
-#include "task/clock_task.h"
-#include "task/weather_task.h"
-#include "task/sensor_task.h"
-#include "task/brightness_task.h"
+
 
 SemaphoreHandle_t mutex = xSemaphoreCreateMutex();
 
@@ -33,53 +29,7 @@ void setup()
   //Wire.setTimeOut(10000);
   Wire1.begin(I2C_SDA, I2C_SCL, I2C_FREQ);
 
-  wifi_start();
-  esp_now_start();
-
   gui_start(); 
-
-
-          
-
-  xTaskCreatePinnedToCore(
-                    clock_task,   /* Task function. */
-                    "Clock Task", /* String with name of task. */
-                    4096,         /* Stack size in bytes. */
-                    NULL,         /* Parameter passed as input of the task */
-                    1,            /* Priority of the task. */
-                    NULL,         /* Task handle. */
-                    1);           /* Clock task on core 0*/      
- 
-  xTaskCreatePinnedToCore(
-                    sensor_task,   /* Task function. */
-                    "Sensor Task", /* String with name of task. */
-                    4096,         /* Stack size in bytes. */
-                    NULL,         /* Parameter passed as input of the task */
-                    1,           /* Priority of the task. */
-                    NULL,         /* Task handle. */
-                    1);                                                               
-
-  xTaskCreatePinnedToCore(
-                    brightness_task,   
-                    "Brightness Task", 
-                    4096,        
-                    NULL,         
-                    1,           
-                    NULL,         
-                    1); 
-                    
-  xTaskCreatePinnedToCore(
-                    weather_task,   
-                    "Weather Task", 
-                    16384,        
-                    NULL,         
-                    1,           
-                    NULL,         
-                    1);    
-
-  
-  //delay(10000);
-  //gui_screenshot();   
                      
 }
 

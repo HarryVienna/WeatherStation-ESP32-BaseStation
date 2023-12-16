@@ -16,12 +16,19 @@ OpenWeatherApi::OpenWeatherApi(const String& url, const String& lat, const Strin
 }
 
 
-// Funktion, die die API-Anfrage sendet und die Wetterdaten als OpenWeatherData-Objekt zurückgibt
+/**
+ * @brief     Fetches weather data from the OpenWeatherMap API
+ *
+ * @return    OpenWeatherData   Weather data retrieved from the API
+ *
+ * @details   Constructs a request URL using specified parameters (latitude, longitude, units, language, API key).
+ *            For example https://api.openweathermap.org/data/3.0/onecall?lat=48.214110&lon=16.323219&units=metric&lang=de&appid=xxx
+ *            Sends an HTTP GET request to the OpenWeatherMap API and retrieves weather data.
+ *            Parses the JSON response and constructs an OpenWeatherData object.
+ *            Returns the retrieved weather data.
+ */
 OpenWeatherData OpenWeatherApi::getdata() {
-    //Serial.println("Calling API");
 
-    // https://api.openweathermap.org/data/3.0/onecall?lat=48.214110&lon=16.323219&units=metric&lang=de&appid=abdb6964a969eeceed4f072180f1d3a7
-    
     String apiURL = url_ + "?lat=" + lat_ + "&lon=" + lon_ + "&units=" + units_ + "&lang=" + lang_ + "&appid=" + appid_;
     //Serial.println(apiURL);
 

@@ -32,17 +32,23 @@
  *  STATIC PROTOTYPES
  **********************/
 static void lv_hourly_chart_constructor(const lv_obj_class_t * class_p, lv_obj_t * obj);
+static void lv_hourly_chart_destructor(const lv_obj_class_t * class_p, lv_obj_t * obj);
 static void lv_hourly_chart_event(const lv_obj_class_t * class_p, lv_event_t * e);
 
+static void draw_hourly_y_ticks(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx, lv_hourly_chart_axis_t axis);
+static void draw_hourly_x_ticks(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx);
+static void draw_hourly_div_lines(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx);
+static void draw_hourly_clouds(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx);
+static void draw_hourly_temp(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx);
+static void draw_hourly_precipitation(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx);
 
 /**********************
  *  STATIC VARIABLES
  **********************/
 const lv_obj_class_t lv_hourly_chart_class = {
     .constructor_cb = lv_hourly_chart_constructor,
+    .destructor_cb = lv_hourly_chart_destructor,
     .event_cb = lv_hourly_chart_event,
-    //.width_def = LV_SIZE_CONTENT,
-    //.height_def = LV_SIZE_CONTENT,
     .width_def = LV_PCT(100),
     .height_def = LV_DPI_DEF * 2,    
     .instance_size = sizeof(lv_hourly_chart_t),
@@ -59,7 +65,7 @@ const lv_obj_class_t lv_hourly_chart_class = {
 
 lv_obj_t * lv_hourly_chart_create(lv_obj_t * parent)
 {
-    LV_LOG_INFO("begin");
+    log_i("lv_hourly_chart_create");
     lv_obj_t * obj = lv_obj_class_create_obj(MY_CLASS, parent);
     lv_obj_class_init_obj(obj);
     return obj;
@@ -78,7 +84,6 @@ void lv_hourly_chart_refresh(lv_obj_t * obj)
 
 void lv_hourly_chart_set_data(lv_obj_t * obj, const lv_hourly_data *data)
 {
-
     LV_ASSERT_OBJ(obj, MY_CLASS);
 
     if (obj == NULL || data == NULL) {
@@ -115,7 +120,7 @@ void lv_hourly_chart_set_data(lv_obj_t * obj, const lv_hourly_data *data)
 
     chart->has_data = true;
 
-    lv_obj_invalidate(obj);
+    lv_hourly_chart_refresh(obj);
 }
 
 
@@ -127,20 +132,26 @@ void lv_hourly_chart_set_data(lv_obj_t * obj, const lv_hourly_data *data)
 static void lv_hourly_chart_constructor(const lv_obj_class_t * class_p, lv_obj_t * obj)
 {
     LV_UNUSED(class_p);
-    LV_TRACE_OBJ_CREATE("begin");
 
     lv_hourly_chart_t * chart = (lv_hourly_chart_t *)obj;
 
     chart->has_data = false;
-
-    LV_TRACE_OBJ_CREATE("finished");
 }
 
+static void lv_hourly_chart_destructor(const lv_obj_class_t * class_p, lv_obj_t * obj)
+{
+    LV_UNUSED(class_p);
+
+    lv_hourly_chart_t * chart = (lv_hourly_chart_t *)obj;
+}
 
 static void draw_hourly_y_ticks(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx, lv_hourly_chart_axis_t axis)
 {
-    //LV_LOG_WARN("---------------------");   
     lv_hourly_chart_t * chart  = (lv_hourly_chart_t *)obj;
+
+    if (!chart->has_data) {
+        return;
+    }
 
     int32_t ticks_cnt;
     int32_t min;
@@ -233,6 +244,10 @@ static void draw_hourly_x_ticks(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
 {
     lv_hourly_chart_t * chart  = (lv_hourly_chart_t *)obj;
 
+    if (!chart->has_data) {
+        return;
+    }
+
     lv_point_t p1;
     lv_point_t p2;
 
@@ -313,9 +328,11 @@ static void draw_hourly_x_ticks(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
 
 static void draw_hourly_div_lines(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
 {
-    //LV_LOG_WARN("---------------------");   
-
     lv_hourly_chart_t * chart  = (lv_hourly_chart_t *)obj;
+
+    if (!chart->has_data) {
+        return;
+    }    
 
     lv_point_t p1;
     lv_point_t p2;
@@ -392,6 +409,10 @@ static void draw_hourly_clouds(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
 {
     lv_hourly_chart_t * chart  = (lv_hourly_chart_t *)obj;
 
+    if (!chart->has_data) {
+        return;
+    }    
+
     lv_point_t p1;
     lv_point_t p2;
 
@@ -441,9 +462,11 @@ static void draw_hourly_clouds(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
 
 static void draw_hourly_temp(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
 {
-    //LV_LOG_WARN("---------------------");   
-
     lv_hourly_chart_t * chart  = (lv_hourly_chart_t *)obj;
+
+    if (!chart->has_data) {
+        return;
+    }    
 
     lv_point_t p1;
     lv_point_t p2;
@@ -517,6 +540,10 @@ static void draw_hourly_temp(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
 static void draw_hourly_precipitation(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
 {
     lv_hourly_chart_t * chart  = (lv_hourly_chart_t *)obj;
+
+    if (!chart->has_data) {
+        return;
+    }
 
     lv_point_t p1;
     lv_point_t p2;

@@ -32,8 +32,15 @@
  *  STATIC PROTOTYPES
  **********************/
 static void lv_daily_chart_constructor(const lv_obj_class_t * class_p, lv_obj_t * obj);
+static void lv_daily_chart_destructor(const lv_obj_class_t * class_p, lv_obj_t * obj);
 static void lv_daily_chart_event(const lv_obj_class_t * class_p, lv_event_t * e);
 
+static void draw_daily_y_ticks(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx, lv_daily_chart_axis_t axis);
+static void draw_daily_x_ticks(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx);
+static void draw_daily_div_lines(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx);
+static void draw_daily_clouds(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx);
+static void draw_daily_temp(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx);
+static void draw_daily_precipitation(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx);
 
 /**********************
  *  STATIC VARIABLES
@@ -60,7 +67,7 @@ const lv_obj_class_t lv_daily_chart_class = {
 
 lv_obj_t * lv_daily_chart_create(lv_obj_t * parent)
 {
-    LV_LOG_INFO("begin");
+    log_i("lv_daily_chart_create");
     lv_obj_t * obj = lv_obj_class_create_obj(MY_CLASS, parent);
     lv_obj_class_init_obj(obj);
     return obj;
@@ -115,7 +122,7 @@ void lv_daily_chart_set_data(lv_obj_t * obj, const lv_daily_data *data)
 
     chart->has_data = true;
 
-    lv_obj_invalidate(obj);
+    lv_daily_chart_refresh(obj);
 }
 
 
@@ -127,20 +134,27 @@ void lv_daily_chart_set_data(lv_obj_t * obj, const lv_daily_data *data)
 static void lv_daily_chart_constructor(const lv_obj_class_t * class_p, lv_obj_t * obj)
 {
     LV_UNUSED(class_p);
-    LV_TRACE_OBJ_CREATE("begin");
 
     lv_daily_chart_t * chart = (lv_daily_chart_t *)obj;
 
     chart->has_data = false;
+}
 
-    LV_TRACE_OBJ_CREATE("finished");
+static void lv_daily_chart_destructor(const lv_obj_class_t * class_p, lv_obj_t * obj)
+{
+    LV_UNUSED(class_p);
+
+    lv_daily_chart_t * chart = (lv_daily_chart_t *)obj;
 }
 
 
 static void draw_daily_y_ticks(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx, lv_daily_chart_axis_t axis)
 {
-    //LV_LOG_WARN("---------------------");   
     lv_daily_chart_t * chart  = (lv_daily_chart_t *)obj;
+
+    if (!chart->has_data) {
+        return;
+    }    
 
     int32_t ticks_cnt;
     int32_t min;
@@ -233,6 +247,10 @@ static void draw_daily_x_ticks(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
 {
     lv_daily_chart_t * chart  = (lv_daily_chart_t *)obj;
 
+    if (!chart->has_data) {
+        return;
+    }    
+
     lv_point_t p1;
     lv_point_t p2;
 
@@ -297,9 +315,11 @@ static void draw_daily_x_ticks(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
 
 static void draw_daily_div_lines(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
 {
-    //LV_LOG_WARN("---------------------");   
-
     lv_daily_chart_t * chart  = (lv_daily_chart_t *)obj;
+
+    if (!chart->has_data) {
+        return;
+    }    
 
     lv_point_t p1;
     lv_point_t p2;
@@ -344,6 +364,10 @@ static void draw_daily_div_lines(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
 static void draw_daily_clouds(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
 {
     lv_daily_chart_t * chart  = (lv_daily_chart_t *)obj;
+
+    if (!chart->has_data) {
+        return;
+    }    
 
     lv_point_t p1;
     lv_point_t p2;
@@ -394,9 +418,11 @@ static void draw_daily_clouds(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
 
 static void draw_daily_temp(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
 {
-    //LV_LOG_WARN("---------------------");   
-
     lv_daily_chart_t * chart  = (lv_daily_chart_t *)obj;
+
+    if (!chart->has_data) {
+        return;
+    }    
 
     lv_point_t p1;
     lv_point_t p2;
@@ -466,6 +492,10 @@ static void draw_daily_temp(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
 static void draw_daily_precipitation(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
 {
     lv_daily_chart_t * chart  = (lv_daily_chart_t *)obj;
+
+    if (!chart->has_data) {
+        return;
+    }    
 
     lv_point_t p1;
     lv_point_t p2;

@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <Preferences.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -18,21 +19,32 @@ static const char* TAG = "weather_task";
 extern SemaphoreHandle_t mutex;
 
 /**
- * @brief Main task for controling the hands 
+ * @brief     Task for retrieving and displaying weather data from an API
  *
+ * @param     pvParameter   Pointer to task parameters (not used in this function)
+ *
+ * @details   Retrieves weather data from the OpenWeatherMap API based on configured coordinates and API key.
+ *            Periodically calls the API, parses the received JSON data, and displays weather information.
  */
 void weather_task(void *pvParameter){
+
+  Preferences preferences;
+  preferences.begin("Weatherstation", false);
+
+  String openweather_lat = preferences.getString("latitude", ""); 
+  String openweather_lon = preferences.getString("longitude", "");
+  String openweather_appid = preferences.getString("appid", ""); 
+
+  preferences.end();
 
   HTTPClient http;
 
   String openweather_url = "https://api.openweathermap.org/data/3.0/onecall";
-  String openweather_lat = "48.xxx";
-  String openweather_lon = "16.yyy";
   String openweather_units = "metric";
   String openweather_lang = "de";
-  String openweather_appid = "zzz";
-
+  
   String apiURL = openweather_url + "?lat=" + openweather_lat + "&lon=" + openweather_lon + "&units=" + openweather_units + "&lang=" + openweather_lang + "&appid=" + openweather_appid;
+  //String apiURL = "https://haraldkreuzer.net/test30.json";
 
   for (;;) {
 
@@ -63,7 +75,6 @@ void weather_task(void *pvParameter){
 
     http.end();
 
-    vTaskDelay(1000 * 60 * 5 / portTICK_PERIOD_MS); // Every 5 Minutes
-    //vTaskDelay(1000 * 10 / portTICK_PERIOD_MS); // Every 10 Minutes
+    vTaskDelay(1000 * 60 * 10 / portTICK_PERIOD_MS); // Every 5 Minutes
   }
 }

@@ -68,7 +68,7 @@ typedef uint8_t lv_hourly_chart_axis_t;
 
 
 /**
- * `type` field in `lv_obj_draw_part_dsc_t` if `class_p = lv_day_chart_class`
+ * `type` field in `lv_obj_draw_part_dsc_t` if `class_p = lv_hourly_chart_class`
  * Used in `LV_EVENT_DRAW_PART_BEGIN` and `LV_EVENT_DRAW_PART_END`
  */
 typedef enum {

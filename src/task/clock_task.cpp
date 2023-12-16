@@ -21,8 +21,12 @@ static const char* TAG = "clock_task";
 extern SemaphoreHandle_t mutex;
 
 /**
- * @brief Main task for controling the hands 
+ * @brief     Task for updating and displaying date and time
  *
+ * @param     pvParameter   Pointer to task parameters (not used in this function)
+ *
+ * @details   Updates the date and time information continuously and displays it.
+ *            Utilizes a loop to update and format the date-time string at regular intervals.
  */
 void clock_task(void *pvParameter){
 

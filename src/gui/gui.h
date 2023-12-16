@@ -13,4 +13,14 @@ void disp_sen5x(float ambientTemperature, float ambientHumidity, float massConce
 void disp_weather(OpenWeatherData data);
 void set_brightness(uint8_t brightness);
 
+void disp_wifi_networks(String allNetworks);
+void disp_connect_status(bool is_connected);
+
+void set_cities(const char* region);
+void set_labels(String name_base, String name_sensor_1, String name_sensor_2, String name_sensor_3);
+
+void disp_wifi_networks(String allNetworks);
+void disp_connect_status(bool is_connected);
+void start_tasks();
+
 #endif
