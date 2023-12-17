@@ -75,6 +75,6 @@ void weather_task(void *pvParameter){
 
     http.end();
 
-    vTaskDelay(1000 * 60 * 10 / portTICK_PERIOD_MS); // Every 5 Minutes
+    vTaskDelay(1000 * 60 * 10 / portTICK_PERIOD_MS); // Every 10 Minutes == 144 calls per day
   }
 }
