@@ -63,16 +63,16 @@ public:
       cfg.pin_vsync   = GPIO_NUM_40;
       cfg.pin_hsync   = GPIO_NUM_39;
       cfg.pin_pclk    = GPIO_NUM_42;
-      cfg.freq_write  = 8000000;
+      cfg.freq_write  = 12000000;
 
       cfg.hsync_polarity    = 0;
-      cfg.hsync_front_porch = 8;
-      cfg.hsync_pulse_width = 2;
-      cfg.hsync_back_porch  = 43;
+      cfg.hsync_front_porch = 80;
+      cfg.hsync_pulse_width = 4;
+      cfg.hsync_back_porch  = 16;
       cfg.vsync_polarity    = 0;
-      cfg.vsync_front_porch = 8;
-      cfg.vsync_pulse_width = 2;
-      cfg.vsync_back_porch  = 12;
+      cfg.vsync_front_porch = 22;
+      cfg.vsync_pulse_width = 4;
+      cfg.vsync_back_porch  = 4;
       cfg.pclk_idle_high    = 1;
       _bus_instance.config(cfg);
     }
@@ -81,6 +81,7 @@ public:
     {
       auto cfg = _light_instance.config();
       cfg.pin_bl = GPIO_NUM_2;
+      cfg.freq = 20000;
       _light_instance.config(cfg);
     }
     _panel_instance.light(&_light_instance);
