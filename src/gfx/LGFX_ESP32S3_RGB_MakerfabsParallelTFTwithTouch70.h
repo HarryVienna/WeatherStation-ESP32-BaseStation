@@ -63,17 +63,17 @@ public:
       cfg.pin_vsync   = GPIO_NUM_40;
       cfg.pin_hsync   = GPIO_NUM_39;
       cfg.pin_pclk    = GPIO_NUM_42;
-      cfg.freq_write  = 12000000;
+      cfg.freq_write  = 6000000;
 
       // Not sure about these values. Tried many different ones and all worked. So what is really correct?
       cfg.hsync_polarity    = 0;
-      cfg.hsync_front_porch = 80;
-      cfg.hsync_pulse_width = 4;
-      cfg.hsync_back_porch  = 16;
+      cfg.hsync_front_porch = 8;
+      cfg.hsync_pulse_width = 2;
+      cfg.hsync_back_porch  = 43;
       cfg.vsync_polarity    = 0;
-      cfg.vsync_front_porch = 22;
-      cfg.vsync_pulse_width = 4;
-      cfg.vsync_back_porch  = 4;
+      cfg.vsync_front_porch = 8;
+      cfg.vsync_pulse_width = 2;
+      cfg.vsync_back_porch  = 12;
       cfg.pclk_idle_high    = 1;
       _bus_instance.config(cfg);
     }

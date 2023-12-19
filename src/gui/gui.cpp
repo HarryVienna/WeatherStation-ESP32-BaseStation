@@ -924,7 +924,7 @@ void start_tasks()
       NULL,         /* Task handle. */
       1);           /* Clock task on core 0*/
 
-/*   xTaskCreatePinnedToCore(
+  xTaskCreatePinnedToCore(
       sensor_task,    
       "Sensor Task",  
       4096,          
@@ -940,7 +940,7 @@ void start_tasks()
       NULL,
       1,
       NULL,
-      1); */
+      1);
 
   xTaskCreatePinnedToCore(
       weather_task,
@@ -1019,7 +1019,7 @@ void event_wifi_scan(lv_event_t *e)
       NULL,            // Task input parameter
       16,              // Task priority
       NULL,            // Task handle
-      1                // Core to run the task on (0 or 1)
+      0                // Core to run the task on (0 or 1)
   );
 }
 
@@ -1041,7 +1041,7 @@ void event_wifi_connect(lv_event_t *e)
       wifiParams,         // Task input parameter
       16,                 // Task priority
       NULL,               // Task handle
-      1                   // Core to run the task on (0 or 1)
+      0                   // Core to run the task on (0 or 1)
   );
 }
 
