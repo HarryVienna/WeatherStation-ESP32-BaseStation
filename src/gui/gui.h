@@ -15,6 +15,8 @@ void set_brightness(uint8_t brightness);
 
 void disp_wifi_networks(String allNetworks);
 void disp_connect_status(bool is_connected);
+void disp_disable_scanbutton(bool is_disabled);
+void disp_disable_connectbutton(bool is_disabled);
 
 void set_cities(const char* region);
 void set_labels(String name_base, String name_sensor_1, String name_sensor_2, String name_sensor_3);

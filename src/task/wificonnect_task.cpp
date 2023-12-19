@@ -32,6 +32,10 @@ extern SemaphoreHandle_t mutex;
  */
 void wificonnect_task(void *pvParameter){
 
+  xSemaphoreTake(mutex, portMAX_DELAY);
+  disp_disable_connectbutton(true);
+  xSemaphoreGive(mutex);
+
   local_wifi_sta_config_t *wifiParams = (local_wifi_sta_config_t *)pvParameter;
 
   const char* ssid = wifiParams->ssid;
@@ -40,7 +44,9 @@ void wificonnect_task(void *pvParameter){
   const int maxAttempts = 10;
   int attempts = 0;
 
-  WiFi.disconnect(true); // Disconnect any previous connections
+  WiFi.disconnect(false); // Disconnect any previous connections
+
+  delay(1000);
 
   WiFi.mode(WIFI_STA);
 
@@ -67,10 +73,11 @@ void wificonnect_task(void *pvParameter){
     attempts++;
   }
 
-  WiFi.disconnect(true);
+  WiFi.disconnect(false);
 
   xSemaphoreTake(mutex, portMAX_DELAY);
   disp_connect_status(is_connected);
+  disp_disable_connectbutton(false);
   xSemaphoreGive(mutex);
 
   vTaskDelete(NULL); // Delete the task when done

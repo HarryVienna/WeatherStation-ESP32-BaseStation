@@ -855,6 +855,30 @@ void disp_connect_status(bool is_connected)
   }
 }
 
+void disp_disable_scanbutton(bool is_disabled)
+{
+  if (is_disabled)
+  {
+    lv_obj_add_state( ui_ButtonScan, LV_STATE_DISABLED ); 
+  }
+  else
+  {
+    lv_obj_clear_state( ui_ButtonScan, LV_STATE_DISABLED ); 
+  }
+}
+
+void disp_disable_connectbutton(bool is_disabled)
+{
+  if (is_disabled)
+  {
+    lv_obj_add_state( ui_ButtonConnect, LV_STATE_DISABLED ); 
+  }
+  else
+  {
+    lv_obj_clear_state( ui_ButtonConnect, LV_STATE_DISABLED ); 
+  }
+}
+
 void set_cities(const char *region)
 {
   lv_dropdown_clear_options(ui_DropdownCity);
@@ -900,13 +924,13 @@ void start_tasks()
       NULL,         /* Task handle. */
       1);           /* Clock task on core 0*/
 
-  xTaskCreatePinnedToCore(
-      sensor_task,   /* Task function. */
-      "Sensor Task", /* String with name of task. */
-      4096,          /* Stack size in bytes. */
-      NULL,          /* Parameter passed as input of the task */
-      1,             /* Priority of the task. */
-      NULL,          /* Task handle. */
+/*   xTaskCreatePinnedToCore(
+      sensor_task,    
+      "Sensor Task",  
+      4096,          
+      NULL,           
+      1,       
+      NULL,       
       1);
 
   xTaskCreatePinnedToCore(
@@ -916,7 +940,7 @@ void start_tasks()
       NULL,
       1,
       NULL,
-      1);
+      1); */
 
   xTaskCreatePinnedToCore(
       weather_task,
@@ -932,8 +956,6 @@ void start_tasks()
 
 void event_screen_loaded(lv_event_t *e)
 {
-  Serial.println("event_screen_loaded");
-
   Preferences preferences;
 
   preferences.begin("Weatherstation", false);
@@ -990,8 +1012,6 @@ void event_screen_loaded(lv_event_t *e)
 void event_wifi_scan(lv_event_t *e)
 {
 
-  Serial.println("event_wifi_scan");
-
   xTaskCreatePinnedToCore(
       wifiscan_task,   // Task function
       "WiFiScan Task", // Task name
@@ -1005,8 +1025,6 @@ void event_wifi_scan(lv_event_t *e)
 
 void event_wifi_connect(lv_event_t *e)
 {
-  Serial.println("event_wifi_connect");
-
   char network[64];
   lv_dropdown_get_selected_str(ui_DropdownNetworks, network, sizeof(network));
   const char *password = lv_textarea_get_text(ui_TextAreaPassword);
@@ -1029,8 +1047,6 @@ void event_wifi_connect(lv_event_t *e)
 
 void event_value_changed(lv_event_t *e)
 {
-  Serial.println("event_value_changed");
-
   int selectedRegion = lv_dropdown_get_selected(ui_DropdownRegion);
   Serial.print("selectedRegion ");
   Serial.println(selectedRegion);
@@ -1047,8 +1063,6 @@ void event_value_changed(lv_event_t *e)
 
 void event_weatherstation_start(lv_event_t *e)
 {
-  Serial.println("event_weatherstation_start");
-
   // Store preferences
   Preferences preferences;
   preferences.begin("Weatherstation", false);

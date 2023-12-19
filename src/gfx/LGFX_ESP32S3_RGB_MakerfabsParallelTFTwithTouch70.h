@@ -65,6 +65,7 @@ public:
       cfg.pin_pclk    = GPIO_NUM_42;
       cfg.freq_write  = 12000000;
 
+      // Not sure about these values. Tried many different ones and all worked. So what is really correct?
       cfg.hsync_polarity    = 0;
       cfg.hsync_front_porch = 80;
       cfg.hsync_pulse_width = 4;

@@ -33,8 +33,15 @@ extern SemaphoreHandle_t mutex;
  */
 void wifiscan_task(void *pvParameter){
 
+  xSemaphoreTake(mutex, portMAX_DELAY);
+  disp_disable_scanbutton(true);
+  xSemaphoreGive(mutex);
+
   // Start Wi-Fi scanning
-  WiFi.disconnect(true); // Disconnect any previous connections
+  WiFi.disconnect(false); // Disconnect any previous connections
+  
+  delay(1000);
+
   int networksFound = WiFi.scanNetworks();
 
   String allNetworks;
@@ -53,6 +60,7 @@ void wifiscan_task(void *pvParameter){
 
   xSemaphoreTake(mutex, portMAX_DELAY);
   disp_wifi_networks(allNetworks);
+  disp_disable_scanbutton(false);
   xSemaphoreGive(mutex);
 
   vTaskDelete(NULL); // Delete the task when done
