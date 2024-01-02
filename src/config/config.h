@@ -1,7 +1,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define ADC_PIN 11
+#define ADC_PIN 17   // This pin works better for the ADC since there is no pullup resister in the display board                                                                                                                                                                                                        
 
 #define I2C_SCL 13
 #define I2C_SDA 12

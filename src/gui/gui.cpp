@@ -12,6 +12,7 @@
 #include "../gfx/LGFX_ESP32S3_RGB_MakerfabsParallelTFTwithTouch70.h"
 #include "../lvgl/lv_hourly_chart.h"
 #include "../lvgl/lv_daily_chart.h"
+
 #include "../config/config.h"
 
 #include "gui.h"

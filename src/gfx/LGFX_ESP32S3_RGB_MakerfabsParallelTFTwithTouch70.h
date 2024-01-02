@@ -63,17 +63,17 @@ public:
       cfg.pin_vsync   = GPIO_NUM_40;
       cfg.pin_hsync   = GPIO_NUM_39;
       cfg.pin_pclk    = GPIO_NUM_42;
-      cfg.freq_write  = 6000000;
+      cfg.freq_write  = 12000000;
 
       // Not sure about these values. Tried many different ones and all worked. So what is really correct?
       cfg.hsync_polarity    = 0;
-      cfg.hsync_front_porch = 8;
-      cfg.hsync_pulse_width = 2;
-      cfg.hsync_back_porch  = 43;
+      cfg.hsync_front_porch = 80;
+      cfg.hsync_pulse_width = 4;
+      cfg.hsync_back_porch  = 16;
       cfg.vsync_polarity    = 0;
-      cfg.vsync_front_porch = 8;
-      cfg.vsync_pulse_width = 2;
-      cfg.vsync_back_porch  = 12;
+      cfg.vsync_front_porch = 22;
+      cfg.vsync_pulse_width = 4;
+      cfg.vsync_back_porch  = 4;
       cfg.pclk_idle_high    = 1;
       _bus_instance.config(cfg);
     }
@@ -82,7 +82,7 @@ public:
     {
       auto cfg = _light_instance.config();
       cfg.pin_bl = GPIO_NUM_2;
-      cfg.freq = 20000;
+      cfg.freq = 1200;
       _light_instance.config(cfg);
     }
     _panel_instance.light(&_light_instance);
@@ -90,7 +90,9 @@ public:
     {
       auto cfg = _touch_instance.config();
       cfg.x_min      = 0;
+      cfg.x_max      = 800;
       cfg.y_min      = 0;
+      cfg.y_max      = 480;
       cfg.bus_shared = false;
       cfg.offset_rotation = 0;
       // I2C connection
@@ -99,9 +101,8 @@ public:
       cfg.pin_scl    = GPIO_NUM_20;
       cfg.pin_int    = GPIO_NUM_NC;
       cfg.pin_rst    = GPIO_NUM_38;
-      cfg.x_max      = 800;
-      cfg.y_max      = 480;
-      cfg.freq       = 100000;
+      cfg.freq       = 400000;
+      cfg.i2c_addr   = 0x14;        // 0x5D , 0x14
       _touch_instance.config(cfg);
       _panel_instance.setTouch(&_touch_instance);
     }

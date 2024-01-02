@@ -22,18 +22,18 @@ static const char* TAG = "brightness_task";
  *
  * @param     value   Sensor value to be mapped to brightness
  *
- * @return    uint8_t The mapped brightness level (4-255 range)
+ * @return    uint8_t The mapped brightness level
  *
  * @details   Maps sensor values within a specified range to corresponding brightness levels.
  *            Uses logarithmic scaling to convert sensor values to a suitable brightness scale.
  */
-uint8_t map_brightness(float value) {
-  
-  const float adc_from = 800;   // Values from ADC 800 = very bright, 4000 = very dark
-  const float adc_to   = 4000;  
+uint8_t map_brightness(uint16_t value) {
+
+  const uint16_t adc_from = 0;     // Set these two values according to the LDR used. The first value for very bright surroundings, the second value for darkness
+  const uint16_t adc_to   = 1200;  
 
   const float brightness_from = log(255);   // Brightness levels
-  const float brightness_to   = log(4);
+  const float brightness_to   = log(10);
 
   if (value < adc_from) {
     value = adc_from;
@@ -45,6 +45,8 @@ uint8_t map_brightness(float value) {
   const float scale = (brightness_to - brightness_from) / (adc_to - adc_from);
 
   uint8_t brightness = (uint8_t)exp(brightness_from + scale * (value - adc_from));
+
+  //log_i("Sensor value %d    Mapped value %d", value, brightness); 
 
   return brightness;
 }
@@ -71,9 +73,9 @@ void brightness_task(void *pvParameter){
   for (;;) {
 
     uint16_t sensorVal = analogRead(ADC_PIN);
-    //log_i("%d", sensorVal);
+
     target_brightness = map_brightness(sensorVal);
-    //log_i("%d %d", current_brightness, target_brightness);
+
   
     int16_t brightness_difference = target_brightness - current_brightness;
 
