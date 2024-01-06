@@ -29,11 +29,13 @@ static const char* TAG = "brightness_task";
  */
 uint8_t map_brightness(uint16_t value) {
 
-  const uint16_t adc_from = 0;     // Set these two values according to the LDR used. The first value for very bright surroundings, the second value for darkness
-  const uint16_t adc_to   = 1200;  
+  //log_i("Sensor value %d", value); 
 
-  const float brightness_from = log(255);   // Brightness levels
-  const float brightness_to   = log(10);
+  const uint16_t adc_from = 0;     // Set these two values according to the LDR used. The first value for very bright surroundings, the second value for darkness
+  const uint16_t adc_to   = 2300;  
+
+  const float brightness_from = log(128);   // Brightness levels max and min. The value should not be too high, as the display heats up slightly and distorts the temperature value a little
+  const float brightness_to   = log(4);
 
   if (value < adc_from) {
     value = adc_from;
@@ -46,7 +48,7 @@ uint8_t map_brightness(uint16_t value) {
 
   uint8_t brightness = (uint8_t)exp(brightness_from + scale * (value - adc_from));
 
-  //log_i("Sensor value %d    Mapped value %d", value, brightness); 
+  //log_i("                 Mapped value %d", brightness); 
 
   return brightness;
 }
