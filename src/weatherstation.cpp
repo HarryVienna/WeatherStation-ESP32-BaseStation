@@ -41,5 +41,5 @@ void loop()
   lv_timer_handler();
   xSemaphoreGive(mutex);
 
-  delay(5);
+  delay(10);
 }
