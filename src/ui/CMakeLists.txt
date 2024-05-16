@@ -3,6 +3,8 @@ SET(SOURCES screens/ui_SetupScreen.c
     ui.c
     components/ui_comp_hook.c
     ui_helpers.c
+    ui_events.cpp
+    images/ui_img_wifi_off_png.c
     images/ui_img_04d_png.c
     images/ui_img_cloud_png.c
     images/ui_img_uv_png.c
@@ -12,7 +14,7 @@ SET(SOURCES screens/ui_SetupScreen.c
     images/ui_img_humidity_png.c
     images/ui_img_pressure_png.c
     images/ui_img_battery_png.c
-    images/ui_img_uhr_png.c
+    images/ui_img_clock_png.c
     images/ui_img_01d_png.c
     images/ui_img_01n_png.c
     images/ui_img_02d_png.c
@@ -30,6 +32,7 @@ SET(SOURCES screens/ui_SetupScreen.c
     images/ui_img_13n_png.c
     images/ui_img_50d_png.c
     images/ui_img_50n_png.c
+    images/ui_img_wifi_on_png.c
     fonts/ui_font_FreeSans10.c
     fonts/ui_font_FreeSans14.c
     fonts/ui_font_FreeSans16.c
@@ -37,9 +40,15 @@ SET(SOURCES screens/ui_SetupScreen.c
     fonts/ui_font_FreeSans20.c
     fonts/ui_font_FreeSans22.c
     fonts/ui_font_FreeSans24.c
+    fonts/ui_font_FreeSans26.c
+    fonts/ui_font_FreeSans30.c
+    fonts/ui_font_FreeSans34.c
+    fonts/ui_font_FreeSans36.c
     fonts/ui_font_FreeSansBold38.c
     fonts/ui_font_FreeSansBold44.c
     fonts/ui_font_FreeSansBold46.c
-    fonts/ui_font_FreeSansBold48.c)
+    fonts/ui_font_FreeSansBold48.c
+    fonts/ui_font_FreeSansBold60.c
+    fonts/ui_font_FreeSansBold62.c)
 
 add_library(ui ${SOURCES})
