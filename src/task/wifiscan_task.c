@@ -25,48 +25,49 @@ extern SemaphoreHandle_t lvgl_mux;
 void wifiscan_task(void *pvParameter) {
     ESP_LOGI(TAG, "Start wifiscan_task");
 
-    // Initialize NVS
-    esp_err_t ret = nvs_flash_init();
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-        ESP_ERROR_CHECK(nvs_flash_erase());
-        ret = nvs_flash_init();
-    }
-    ESP_ERROR_CHECK( ret );
+    xSemaphoreTakeRecursive(lvgl_mux, portMAX_DELAY);
+    disp_disable_scanbutton(true);
+    xSemaphoreGiveRecursive(lvgl_mux);
 
-    // Initialize Wi-Fi driver
-    ESP_ERROR_CHECK(esp_netif_init());
-    ESP_ERROR_CHECK(esp_event_loop_create_default());
-    esp_netif_t *sta_netif = esp_netif_create_default_wifi_sta();
-    assert(sta_netif);
+    ESP_ERROR_CHECK(esp_wifi_disconnect());
+    vTaskDelay(pdMS_TO_TICKS(1000)); // Delay for 1 second
+    
+    wifi_scan_config_t scan_config = {
+        .ssid = NULL,
+        .bssid = NULL,
+        .channel = 0,
+        .show_hidden = true,
+        .scan_type = WIFI_SCAN_TYPE_ACTIVE,
+        .scan_time.active.min = 100,
+        .scan_time.active.max = 300,
+    };
 
-    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+    uint16_t ap_count = 16;
+    esp_wifi_scan_start(&scan_config, true);
+    esp_wifi_scan_get_ap_records(&ap_count, NULL);
 
-    uint16_t number = 32;
-    wifi_ap_record_t ap_info[32];
-    uint16_t ap_count = 0;
-    memset(ap_info, 0, sizeof(ap_info));
+    wifi_ap_record_t *ap_records = (wifi_ap_record_t *)malloc(sizeof(wifi_ap_record_t) * ap_count);
+    esp_wifi_scan_get_ap_records(&ap_count, ap_records);
 
-    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
-    ESP_ERROR_CHECK(esp_wifi_start());
-    esp_wifi_scan_start(NULL, true);
-    ESP_LOGI(TAG, "Max AP number ap_info can hold = %u", number);
-    ESP_ERROR_CHECK(esp_wifi_scan_get_ap_records(&number, ap_info));
-    ESP_ERROR_CHECK(esp_wifi_scan_get_ap_num(&ap_count));
-    ESP_LOGI(TAG, "Total APs scanned = %u, actual AP number ap_info holds = %u", ap_count, number);
-    for (int i = 0; i < number; i++) {
-        ESP_LOGI(TAG, "SSID \t\t%s", ap_info[i].ssid);
-        ESP_LOGI(TAG, "RSSI \t\t%d", ap_info[i].rssi);
-        //print_auth_mode(ap_info[i].authmode);
-        if (ap_info[i].authmode != WIFI_AUTH_WEP) {
-            //print_cipher_type(ap_info[i].pairwise_cipher, ap_info[i].group_cipher);
+    char allNetworks[4096] = {0}; // Assuming a maximum of 4096 characters for all network names
+
+    // Print scanned networks
+    for (uint16_t i = 0; i < ap_count; i++) {
+        char item[128]; // Assuming a maximum of 128 characters per network item
+        snprintf(item, sizeof(item), "%s (%d) %s", (const char *)ap_records[i].ssid, ap_records[i].rssi, (ap_records[i].authmode == WIFI_AUTH_OPEN) ? "" : "*");
+        ESP_LOGI(TAG, "%s", item);
+
+        strlcat(allNetworks, (const char *)ap_records[i].ssid, sizeof(allNetworks));
+        if (i != ap_count - 1) {
+            strlcat(allNetworks, "\n", sizeof(allNetworks)); // Add newline character except for the last SSID
         }
-        ESP_LOGI(TAG, "Channel \t\t%d", ap_info[i].primary);
     }
+
+    free(ap_records);
 
     xSemaphoreTakeRecursive(lvgl_mux, portMAX_DELAY);
-    //disp_wifi_networks(allNetworks);
-    //disp_disable_scanbutton(false);
+    disp_wifi_networks(allNetworks);
+    disp_disable_scanbutton(false);
     xSemaphoreGiveRecursive(lvgl_mux);
 
     vTaskDelete(NULL); // Delete the task when done

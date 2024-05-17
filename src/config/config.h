@@ -1,3 +1,6 @@
+// WFI
+#define HOST_NAME   "ESP32-WEATHERSTATION"
+
 
 // PWM Configuration
 #define PWM_FREQ               200 
@@ -15,7 +18,7 @@
 #define I2C_NUM          I2C_NUM_0
 
 // LCD
-#define LCD_PIXEL_CLOCK_HZ     (12 * 1000 * 1000)
+#define LCD_PIXEL_CLOCK_HZ     (16 * 1000 * 1000)
 
 #define PIN_NUM_HSYNC          GPIO_NUM_39
 #define PIN_NUM_VSYNC          GPIO_NUM_41
@@ -50,6 +53,6 @@
 #define LCD_V_RES         600
 
 // LVGL
-#define LVGL_TASK_DELAY_MS   10
+#define LVGL_TASK_DELAY_MS   50
 #define LVGL_TASK_STACK_SIZE (4 * 1024)
 #define LVGL_TASK_PRIORITY   2

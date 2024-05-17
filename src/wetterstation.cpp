@@ -3,6 +3,9 @@
 #include "esp_err.h"
 #include "esp_log.h"
 
+#include "config/config.h"
+
+#include "wifi/wifi.h"
 #include "display/esp32_s3.h"
 #include "ui/ui.h"
 
@@ -19,8 +22,8 @@ extern SemaphoreHandle_t lvgl_mux;
 extern "C" void app_main(void)
 {
 
+    init_wifi();
     init_display();
-    set_backlight_brightness(128);
 
 
     ESP_LOGI(TAG, "Start LVGL");
@@ -37,7 +40,7 @@ extern "C" void app_main(void)
         lv_timer_handler();
         xSemaphoreGiveRecursive(lvgl_mux);
 
-        vTaskDelay(pdMS_TO_TICKS(100));
+        vTaskDelay(pdMS_TO_TICKS(LVGL_TASK_DELAY_MS));
     }
 
 }

@@ -16,6 +16,7 @@
         "sensirion_i2c_hal.h": "c",
         "sensirion_i2c_esp32_config.h": "c",
         "ets_sys.h": "c",
-        "config.h": "c"
+        "config.h": "c",
+        "freertos.h": "c"
     }
 }

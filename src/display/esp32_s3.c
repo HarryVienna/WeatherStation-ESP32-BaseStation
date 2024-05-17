@@ -12,8 +12,7 @@
 #include "lvgl.h"
 #include "esp32_s3.h"
 
-#include "matouch_7inch_1024x600.h"
-
+#include "../config/config.h"
 
 
 
@@ -72,6 +71,8 @@ void init_backlight(void) {
     ESP_LOGI(TAG, "Initializing LCD backlight");
     ledc_timer_config(&ledc_timer);
     ledc_channel_config(&ledc_channel);
+
+    set_backlight_brightness(128);
 }
 
 /**
