@@ -410,7 +410,5 @@ void ui_init(void)
     ui_WeatherstationScreen_screen_init();
     ui____initial_actions0 = lv_obj_create(NULL);
 
-    lv_disp_set_rotation(dispp, LV_DISP_ROT_180);
-
     lv_disp_load_scr(ui_SetupScreen);
 }

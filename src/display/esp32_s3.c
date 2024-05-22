@@ -133,8 +133,8 @@ void init_touch(esp_lcd_touch_handle_t *touch_handle) {
         },
         .flags = {
             .swap_xy = 0,
-            .mirror_x = 0,
-            .mirror_y = 0,
+            .mirror_x = 1,
+            .mirror_y = 1,
         },
     };
     esp_lcd_panel_io_handle_t tp_io_handle = NULL;
@@ -220,6 +220,7 @@ void init_lcd(esp_lcd_panel_handle_t *panel_handle) {
     esp_lcd_panel_reset(*panel_handle);
     esp_lcd_panel_init(*panel_handle);
 
+    // Rotate Display 180°
     esp_lcd_panel_mirror(*panel_handle, true, true);
     esp_lcd_panel_swap_xy(*panel_handle, false);
 
