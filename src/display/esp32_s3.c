@@ -14,7 +14,13 @@
 
 #include "../config/config.h"
 
+// #define CONFIG_DOUBLE_FB 1
 
+#if CONFIG_DOUBLE_FB
+#define LCD_NUM_FB             2
+#else
+#define LCD_NUM_FB             1
+#endif
 
 static const char* TAG = "DISPLAY";
 
@@ -161,7 +167,7 @@ void init_lcd(esp_lcd_panel_handle_t *panel_handle) {
     esp_lcd_rgb_panel_config_t panel_config = {
         .data_width = 16, // RGB565 in parallel mode, thus 16bit in width
         .psram_trans_align = 64,
-        .num_fbs = 2,
+        .num_fbs = LCD_NUM_FB,
         .clk_src = LCD_CLK_SRC_DEFAULT,
         .disp_gpio_num = PIN_NUM_DISP_EN,
         .pclk_gpio_num = PIN_NUM_PCLK,
@@ -213,6 +219,10 @@ void init_lcd(esp_lcd_panel_handle_t *panel_handle) {
     ESP_LOGI(TAG, "Initialize RGB LCD panel");
     esp_lcd_panel_reset(*panel_handle);
     esp_lcd_panel_init(*panel_handle);
+
+    esp_lcd_panel_mirror(*panel_handle, true, true);
+    esp_lcd_panel_swap_xy(*panel_handle, false);
+
 }
 
 /**
@@ -236,12 +246,21 @@ void init_lvgl(esp_lcd_panel_handle_t panel_handle, esp_lcd_touch_handle_t touch
     
     lv_init();
 
-    ESP_LOGI(TAG, "Use PSRAM framebuffers");
     void *buf1 = NULL;
     void *buf2 = NULL;
-    esp_lcd_rgb_panel_get_frame_buffer(panel_handle, 2, &buf1, &buf2);
-    lv_disp_draw_buf_init(&disp_buf, buf1, buf2, LCD_H_RES * LCD_V_RES);
 
+    #if CONFIG_DOUBLE_FB
+        ESP_LOGI(TAG, "Use frame buffers as LVGL draw buffers");
+        ESP_ERROR_CHECK(esp_lcd_rgb_panel_get_frame_buffer(panel_handle, 2, &buf1, &buf2));
+        // initialize LVGL draw buffers
+        lv_disp_draw_buf_init(&disp_buf, buf1, buf2, LCD_H_RES * LCD_V_RES);
+    #else
+        ESP_LOGI(TAG, "Allocate separate LVGL draw buffers from PSRAM");
+        buf1 = heap_caps_malloc(LCD_H_RES * 100 * sizeof(lv_color_t), MALLOC_CAP_SPIRAM);
+        assert(buf1);
+        // initialize LVGL draw buffers
+        lv_disp_draw_buf_init(&disp_buf, buf1, buf2, LCD_H_RES * 100);
+    #endif 
 
     ESP_LOGI(TAG, "Register display driver to LVGL");
     lv_disp_drv_init(&disp_drv);
@@ -250,7 +269,9 @@ void init_lvgl(esp_lcd_panel_handle_t panel_handle, esp_lcd_touch_handle_t touch
     disp_drv.flush_cb = lvgl_flush_cb;
     disp_drv.draw_buf = &disp_buf;
     disp_drv.user_data = panel_handle;
-    disp_drv.full_refresh = true;
+    #if CONFIG_DOUBLE_FB
+        disp_drv.full_refresh = true; // the full_refresh mode can maintain the synchronization between the two frame buffers
+    #endif
     lv_disp_drv_register(&disp_drv);
 
     ESP_LOGI(TAG, "Register input device driver to LVGL");

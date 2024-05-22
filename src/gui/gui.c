@@ -3,6 +3,7 @@
 #include "gui.h"
 
 #include "task/wifiscan_task.h"
+#include "task/sensor_task.h"
 
 static const char* TAG = "GUI";
 
@@ -58,5 +59,14 @@ void event_value_changed(lv_event_t *e)
 void event_weatherstation_start(lv_event_t *e)
 {
  
+    xTaskCreatePinnedToCore(
+        sensor_task,   // Task function
+        "Sensor Task", // Task name
+        16000,            // Stack size (bytes)
+        NULL,            // Task input parameter
+        16,              // Task priority
+        NULL,            // Task handle
+        0                // Core to run the task on (0 or 1)
+    );
 }
 
