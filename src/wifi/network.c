@@ -279,7 +279,7 @@ static void event_handler(void* arg, esp_event_base_t event_base,
  */
 bool wifi_connect(const char* ssid, const char* password) {
 
-    ESP_LOGI(TAG, "connecting to ap SSID:%s password:%s", ssid, password);
+    ESP_LOGI(TAG, "connecting to ap SSID: >%s<  password: >%s<", ssid, password);
 
     ESP_ERROR_CHECK(esp_wifi_stop());
 
@@ -298,6 +298,7 @@ bool wifi_connect(const char* ssid, const char* password) {
                                                         NULL,
                                                         &instance_got_ip));
     wifi_config_t wifi_config;
+    bzero(&wifi_config, sizeof(wifi_config_t));
     memcpy(wifi_config.sta.ssid, ssid, sizeof(wifi_config.sta.ssid));
     memcpy(wifi_config.sta.password, password, sizeof(wifi_config.sta.password));
 
