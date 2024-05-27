@@ -2,10 +2,152 @@
 
 #include "gui.h"
 
+#include "nvs/preferences.h"
 #include "task/wifiscan_task.h"
+#include "task/wificonnect_task.h"
 #include "task/sensor_task.h"
+#include "task/weather_task.h"
+#include "wifi/network.h"
+
+#include "../config/config.h"
 
 static const char* TAG = "GUI";
+
+
+const char *regionNames[] = {
+    "Africa", "America", "Antarctica", "Arctic", "Asia", "Atlantic", "Australia", "Europe", "Indian", "Pacific"};
+
+const char *cityData[][3] = {
+    {"Africa", "(GMT) Casablanca", "WET0WEST,M3.5.0,M10.5.0/3"},
+    {"Africa", "(GMT +01:00) West Central Africa", "WAT-1"},
+    {"Africa", "(GMT +02:00) Harare, Pretoria", "CAT-2"},
+    {"Africa", "(GMT +02:00) Windhoek", "WAT-1WAST,M9.1.0,M4.1.0"},
+    {"Africa", "(GMT +02:00) Cairo", "EET-2"},
+    {"Africa", "(GMT +03:00) Nairobi", "EAT-3"},
+
+    {"America", "(GMT -03:00) Buenos Aires", "ART3"},
+    {"America", "(GMT -03:00) Brasilia", "BRT3BRST,M10.3.0/0,M2.3.0/0"},
+    {"America", "(GMT -03:00) Greenland", "WGT3WGST,M3.5.0/-2,M10.5.0/-1"},
+    {"America", "(GMT -03:00) Montevideo", "UYT3"},
+    {"America", "(GMT -03:30) Newfoundland", "NST3:30NDT,M3.2.0,M11.1.0"},
+    {"America", "(GMT -03:00) Cayenne, Fortaleza", "GFT3"},
+    {"America", "(GMT -04:00) Atlantic Time (Canada)", "AST4ADT,M3.2.0,M11.1.0"},
+    {"America", "(GMT -04:00) Cuiaba", "AMT4AMST,M10.3.0/0,M2.3.0/0"},
+    {"America", "(GMT -04:00) Santiago", "CLT3"},
+    {"America", "(GMT -04:00) Asuncion", "PYT4PYST,M10.1.0/0,M3.4.0/0"},
+    {"America", "(GMT -04:00) Georgetown, La Paz, Manaus, San Juan", "BOT4"},
+    {"America", "(GMT -04:30) Caracas", "VET4:30"},
+    {"America", "(GMT -05:00) Eastern Time (US & Canada)", "EST5EDT,M3.2.0,M11.1.0"},
+    {"America", "(GMT -05:00) Bogota, Lima, Quito", "COT5"},
+    {"America", "(GMT -05:00) Indiana (East)", "EST5EDT,M3.2.0,M11.1.0"},
+    {"America", "(GMT -06:00) Saskatchewan", "CST6"},
+    {"America", "(GMT -06:00) Central America", "CST6"},
+    {"America", "(GMT -06:00) Guadalajara, Mexico City, Monterrey", "CST6CDT,M4.1.0,M10.5.0"},
+    {"America", "(GMT -06:00) Central Time (US & Canada)", "CST6CDT,M3.2.0,M11.1.0"},
+    {"America", "(GMT -07:00) Chihuahua, La Paz, Mazatlan", "MST7MDT,M4.1.0,M10.5.0"},
+    {"America", "(GMT -07:00) Mountain Time (US & Canada)", "MST7MDT,M3.2.0,M11.1.0"},
+    {"America", "(GMT -07:00) Arizona", "MST7"},
+    {"America", "(GMT -08:00) Baja California", "PST8PDT,M3.2.0,M11.1.0"},
+    {"America", "(GMT -08:00) Pacific Time (US & Canada)", "PST8PDT,M3.2.0,M11.1.0"},
+    {"America", "(GMT -09:00) Alaska", "AKST9AKDT,M3.2.0,M11.1.0"},
+    {"America", "(GMT -10:00) Hawaii-Aleutian", "HST10HDT,M3.2.0,M11.1.0"},
+
+    {"Antarctica", "(GMT +12:00) McMurdo", "NZST-12NZDT,M9.5.0,M4.1.0/3"},
+    {"Antarctica", "(GMT +11:00) Macquarie", "MIST-11"},
+    {"Antarctica", "(GMT +10:00) DumontDUrville", "DDUT-10"},
+    {"Antarctica", "(GMT +08:00) Casey", "AWST-8"},
+    {"Antarctica", "(GMT +07:00) Davis", "DAVT-7"},
+    {"Antarctica", "(GMT +06:00) Vostok", "VOST-6"},
+    {"Antarctica", "(GMT +05:00) Mawson", "MAWT-5"},
+    {"Antarctica", "(GMT +03:00) Syowa", "SYOT-3"},
+    {"Antarctica", "(GMT -04:00) Palmer", "CLT3"},
+    {"Antarctica", "(GMT -04:00) Rothera", "ROTT3"},
+
+    {"Arctic", "(GMT +01:00) Longyearbyen", "CET-1CEST,M3.5.0,M10.5.0/3"},
+
+    {"Asia", "(GMT +12:00) Petropavlovsk-Kamchatsky", "PETT-12"},
+    {"Asia", "(GMT +11:00) Magadan", "MAGT-1"},
+    {"Asia", "(GMT +10:00) Vladivostok", "VLAT-10"},
+    {"Asia", "(GMT +09:00) Yakutsk", "YAKT-9"},
+    {"Asia", "(GMT +09:00) Osaka, Sapporo, Tokyo", "JST-9"},
+    {"Asia", "(GMT +09:00) Seoul", "KST-9"},
+    {"Asia", "(GMT +08:00) Kuala Lumpur, Singapore", "SGT-8"},
+    {"Asia", "(GMT +08:00) Ulaanbaatar", "ULAT-8ULAST,M3.5.6,M9.5.6/0"},
+    {"Asia", "(GMT +08:00) Taipei", "CST-8"},
+    {"Asia", "(GMT +08:00) Irkutsk", "IRKT-8"},
+    {"Asia", "(GMT +08:00) Beijing, Chongqing, Hong Kong, Urumqi", "HKT-8"},
+    {"Asia", "(GMT +07:00) Bangkok, Hanoi, Jakarta", "=WIB-7"},
+    {"Asia", "(GMT +07:00) Krasnoyarsk", "KRAT-7"},
+    {"Asia", "(GMT +06:30) Yangon (Rangoon)", "UNK-6:30"},
+    {"Asia", "(GMT +06:00) Novosibirsk", "NOVT-6"},
+    {"Asia", "(GMT +06:00) Astana", "(GMT-4"},
+    {"Asia", "(GMT +06:00) Dhaka", "BDT-6"},
+    {"Asia", "(GMT +05:45) Kathmandu", "NPT-5:45"},
+    {"Asia", "(GMT +05:30) Sri Jayawardenepura", "IST-5:30"},
+    {"Asia", "(GMT +05:30) Chennai, Kolkata, Mumbai, New Delhi", "IST-5:30"},
+    {"Asia", "(GMT +05:00) Tashkent", "UZT-5"},
+    {"Asia", "(GMT +05:00) Islamabad, Karachi", "PKT-5"},
+    {"Asia", "(GMT +05:00) Ekaterinburg", "YEKT-5"},
+    {"Asia", "(GMT +04:00) Tbilisi", "GET-4"},
+    {"Asia", "(GMT +04:00) Yerevan", "AMT-4"},
+    {"Asia", "(GMT +04:00) Baku", "AZT-4AZST,M3.5.0/4,M10.5.0/5"},
+    {"Asia", "(GMT +04:00) Abu Dhabi, Muscat", "GST-4"},
+    {"Asia", "(GMT +04:30) Kabul", "AFT-4:30"},
+    {"Asia", "(GMT +03:30) Tehran", "IRST-3:30IRDT,80/0,264/0"},
+    {"Asia", "(GMT +03:00) Baghdad", "AST-3"},
+    {"Asia", "(GMT +03:00) Kuwait, Riyadh", "AST-3"},
+    {"Asia", "(GMT +02:00) Damascus", "EET-2EEST,M3.5.5/0,M10.5.5/0"},
+    {"Asia", "(GMT +02:00) Beirut", "EET-2EEST,M3.5.0/0,M10.5.0/0"},
+    {"Asia", "(GMT +02:00) Amman", "EET-2EEST,M3.5.4/24,M10.5.5/1"},
+    {"Asia", "(GMT +02:00) Jerusalem", "IST-2IDT,M3.4.4/26,M10.5.0"},
+
+    {"Atlantic", "(GMT) Monrovia, Reykjavik", "GMT0"},
+    {"Atlantic", "(GMT -01:00) Azores", "AZOT1AZOST,M3.5.0/0,M10.5.0/1"},
+    {"Atlantic", "(GMT -01:00) Cape Verde Is.", "CVT1"},
+
+    {"Australia", "(GMT +10:00) Hobart", "AEST-10AEDT,M10.1.0,M4.1.0/3"},
+    {"Australia", "(GMT +10:00) Brisbane", "AEST-10"},
+    {"Australia", "(GMT +10:00) Canberra, Melbourne, Sydney", "AEST-10AEDT,M10.1.0,M4.1.0/3"},
+    {"Australia", "(GMT +09:30) Adelaide", "ACST-9:30ACDT,M10.1.0,M4.1.0/3"},
+    {"Australia", "(GMT +09:30) Darwin", "ACST-9:30"},
+    {"Australia", "(GMT +08:00) Perth", "AWST-8"},
+
+    {"Europe", "(GMT) Dublin, Edinburgh, Lisbon, London", "GMT0BST,M3.5.0/1,M10.5.0"},
+    {"Europe", "(GMT +01:00) Belgrade, Bratislava, Budapest, Ljubljana, Prague", "CET-1CEST,M3.5.0,M10.5.0/3"},
+    {"Europe", "(GMT +01:00) Sarajevo, Skopje, Warsaw, Zagreb", "CET-1CEST,M3.5.0,M10.5.0/3"},
+    {"Europe", "(GMT +01:00) Brussels, Copenhagen, Madrid, Paris", "CET-1CEST,M3.5.0,M10.5.0/3"},
+    {"Europe", "(GMT +01:00) Amsterdam, Berlin, Bern, Rome, Stockholm, Vienna", "CET-1CEST,M3.5.0,M10.5.0/3"},
+    {"Europe", "(GMT +02:00) Chisinau", "EET-2EEST,M3.5.0,M10.5.0/3"},
+    {"Europe", "(GMT +02:00) Helsinki, Kyiv, Riga, Sofia, Tallinn, Vilnius", "EET-2EEST,M3.5.0/3,M10.5.0/4"},
+    {"Europe", "(GMT +02:00) Athens, Bucharest", "EET-2EEST,M3.5.0/3,M10.5.0/4"},
+    {"Europe", "(GMT +03:00) Minsk", "MSK-3"},
+    {"Europe", "(GMT +03:00) Moscow, St. Petersburg, Volgograd", "MSK-3"},
+    {"Europe", "(GMT +03:00) Istanbul", "EET-3"},
+
+    {"Indian", "(GMT +04:00) Port Louis", "MUT-4"},
+    {"Indian", "(GMT +07:00) Christmas Island", "CXT-7"},
+
+    {"Pacific", "(GMT +13:00) Nuku'alofa", "TOT-13"},
+    {"Pacific", "(GMT +12:00) Fiji, Marshall Is.", "FJT-12FJST,M11.1.0,M1.3.0/3"},
+    {"Pacific", "(GMT +12:00) Auckland, Wellington", "NZST-12NZDT,M9.5.0,M4.1.0/3"},
+    {"Pacific", "(GMT +11:00) Solomon Is., New Caledonia", "SBT-11"},
+    {"Pacific", "(GMT +10:00) Guam, Port Moresby", "PGT-10"},
+    {"Pacific", "(GMT -11:00) Samoa", "WSST-13WSDT,M9.5.0/3,M4.1.0/4"},
+    {"Pacific", "(GMT -10:00) Hawaii", "HST10"},
+    {"Pacific", "(GMT -05:00) Easter Island", "EAST5"}};
+
+// -------- Weatherstation Screen --------
+
+void disp_date_time(char *date_time)
+{
+  lv_label_set_text(ui_DateTime, date_time);
+}
+
+void disp_sensor_data(uint8_t sensor_nr, double temperature, double humidity, double pressure, uint32_t voltage, char *date_time)
+{
+}
+
+// -------- Setup Screen --------
 
 void disp_wifi_networks(char* allNetworks)
 {
@@ -25,11 +167,158 @@ void disp_disable_scanbutton(bool is_disabled)
   }
 }
 
+void disp_disable_connectbutton(bool is_disabled)
+{
+  if (is_disabled)
+  {
+    lv_obj_add_state( ui_ButtonConnect, LV_STATE_DISABLED ); 
+  }
+  else
+  {
+    lv_obj_clear_state( ui_ButtonConnect, LV_STATE_DISABLED ); 
+  }
+}
+
+void disp_connect_status(bool is_connected)
+{
+  if (is_connected)
+  {
+    lv_obj_set_style_bg_color(ui_TextAreaPassword, lv_color_hex(COLOR_LIGHTGREEN), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_TextAreaPassword, 128, LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+  else
+  {
+    lv_obj_set_style_bg_color(ui_TextAreaPassword, lv_color_hex(COLOR_ORANGE), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_TextAreaPassword, 128, LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+}
+
+void set_cities(const char *region)
+{
+  lv_dropdown_clear_options(ui_DropdownCity);
+  for (size_t i = 0; i < sizeof(cityData) / sizeof(cityData[0]); i++)
+  {
+    if (strcmp(cityData[i][0], region) == 0)
+    {
+      // Found a matching region, split city names and add them to the dropdown
+      const char *cities = cityData[i][1];
+      lv_dropdown_add_option(ui_DropdownCity, cities, LV_DROPDOWN_POS_LAST);
+    }
+  }
+}
+
+void set_labels() {
+
+  nvs_handle_t nvs_handle;
+  nvs_open("weatherstation", NVS_READWRITE, &nvs_handle);
+
+  char*  name_base = get_string_from_nvs(nvs_handle, "name_base", "");
+  char*  name_sensor_1 = get_string_from_nvs(nvs_handle, "name_sensor_1", "");
+  char*  name_sensor_2 =get_string_from_nvs(nvs_handle, "name_sensor_2", "");
+  char*  name_sensor_3 = get_string_from_nvs(nvs_handle, "name_sensor_3", "");
+
+  lv_label_set_text(ui_NameBase, name_base);
+  lv_label_set_text(ui_Name0, name_sensor_1);
+  lv_label_set_text(ui_Name1, name_sensor_2);
+  lv_label_set_text(ui_Name2, name_sensor_3);
+
+  nvs_close(nvs_handle);
+}
+
+void start_tasks()
+{
+
+  // xTaskCreatePinnedToCore(
+  //     clock_task,   /* Task function. */
+  //     "Clock Task", /* String with name of task. */
+  //     4096,         /* Stack size in bytes. */
+  //     NULL,         /* Parameter passed as input of the task */
+  //     1,            /* Priority of the task. */
+  //     NULL,         /* Task handle. */
+  //     1);           /* Clock task on core 0*/
+
+  // xTaskCreatePinnedToCore(
+  //     sensor_task,    
+  //     "Sensor Task",  
+  //     4096,          
+  //     NULL,           
+  //     1,       
+  //     NULL,       
+  //     1);
+
+  // xTaskCreatePinnedToCore(
+  //     brightness_task,
+  //     "Brightness Task",
+  //     4096,
+  //     NULL,
+  //     1,
+  //     NULL,
+  //     1);
+
+  // xTaskCreatePinnedToCore(
+  //     weather_task,
+  //     "Weather Task",
+  //     16384,
+  //     NULL,
+  //     1,
+  //     NULL,
+  //     1);
+}
+
 // -------- LVGL Events --------
 
 void event_screen_loaded(lv_event_t *e)
 {
 
+  nvs_handle_t nvs_handle;
+  nvs_open("weatherstation", NVS_READWRITE, &nvs_handle);
+
+  char* ssid = get_string_from_nvs(nvs_handle, "ssid", "");
+  char*  password = get_string_from_nvs(nvs_handle, "password", "");
+  char*  appid = get_string_from_nvs(nvs_handle, "appid", "");
+  char*  latitude = get_string_from_nvs(nvs_handle, "latitude", "");
+  char*  longitude = get_string_from_nvs(nvs_handle, "longitude", "");
+  char*  height = get_string_from_nvs(nvs_handle, "height", "");
+  uint8_t region_id = get_uint8_from_nvs(nvs_handle, "region", 0);
+  uint8_t city_id = get_uint8_from_nvs(nvs_handle, "city", 0);
+  char*  name_base = get_string_from_nvs(nvs_handle, "name_base", "");
+  char*  name_sensor_1 = get_string_from_nvs(nvs_handle, "name_sensor_1", "");
+  char*  name_sensor_2 =get_string_from_nvs(nvs_handle, "name_sensor_2", "");
+  char*  name_sensor_3 = get_string_from_nvs(nvs_handle, "name_sensor_3", "");
+
+  nvs_close(nvs_handle);
+
+  if (strcmp(ssid, "") != 0)
+  {
+    lv_dropdown_clear_options(ui_DropdownNetworks);
+    lv_dropdown_add_option(ui_DropdownNetworks, ssid, LV_DROPDOWN_POS_LAST);
+  }
+  lv_textarea_set_text(ui_TextAreaPassword, password);
+  lv_textarea_set_text(ui_TextAreaAppId, appid);
+
+  lv_textarea_set_text(ui_TextAreaLatitude, latitude);
+  lv_textarea_set_text(ui_TextAreaLongitude, longitude);
+  lv_textarea_set_text(ui_TextAreaHoehe, height);
+
+  // fill the region names
+  for (size_t i = 0; i < sizeof(regionNames) / sizeof(regionNames[0]); i++)
+  {
+    lv_dropdown_add_option(ui_DropdownRegion, regionNames[i], LV_DROPDOWN_POS_LAST);
+  }
+  lv_dropdown_set_selected(ui_DropdownRegion, region_id); // set the selected region id
+  // get the region name
+  char region[64];
+  lv_dropdown_get_selected_str(ui_DropdownRegion, region, sizeof(region));
+  ESP_LOGI(TAG, "region %s", region);
+  // fill the city list
+  set_cities(region);
+  // set the selected city id
+  lv_dropdown_set_selected(ui_DropdownCity, city_id);
+
+  lv_textarea_set_text(ui_TextAreaBasis, name_base);
+  lv_textarea_set_text(ui_TextAreaSensorName1, name_sensor_1);
+  lv_textarea_set_text(ui_TextAreaSensorName2, name_sensor_2);
+  lv_textarea_set_text(ui_TextAreaSensorName3, name_sensor_3);
 }
 
 void event_wifi_scan(lv_event_t *e)
@@ -48,25 +337,104 @@ void event_wifi_scan(lv_event_t *e)
 
 void event_wifi_connect(lv_event_t *e)
 {
- 
+  char network[64];
+  lv_dropdown_get_selected_str(ui_DropdownNetworks, network, sizeof(network));
+  const char *password = lv_textarea_get_text(ui_TextAreaPassword);
+
+  // Allocate memory for ssid and password in the struct
+  local_wifi_sta_config_t *wifiParams = (local_wifi_sta_config_t *)malloc(sizeof(local_wifi_sta_config_t));
+  wifiParams->ssid = strdup(network);
+  wifiParams->password = strdup(password);
+
+  xTaskCreatePinnedToCore(
+      wificonnect_task,   // Task function
+      "WiFiConnect Task", // Task name
+      4096,               // Stack size (bytes)
+      wifiParams,         // Task input parameter
+      16,                 // Task priority
+      NULL,               // Task handle
+      0                   // Core to run the task on (0 or 1)
+  );
+
 }
 
 void event_value_changed(lv_event_t *e)
 {
- 
+  int selectedRegion = lv_dropdown_get_selected(ui_DropdownRegion);
+  ESP_LOGI(TAG,"selectedRegion: %d", selectedRegion);
+
+  char region[64];
+  lv_dropdown_get_selected_str(ui_DropdownRegion, region, sizeof(region));
+  ESP_LOGI(TAG,"region: %s", region);
+
+  set_cities(region);
+
+  lv_dropdown_set_selected(ui_DropdownCity, 0);
 }
+
 
 void event_weatherstation_start(lv_event_t *e)
 {
- 
-    xTaskCreatePinnedToCore(
-        sensor_task,   // Task function
-        "Sensor Task", // Task name
-        16000,            // Stack size (bytes)
-        NULL,            // Task input parameter
-        16,              // Task priority
-        NULL,            // Task handle
-        0                // Core to run the task on (0 or 1)
-    );
+  // Store preferences
+  nvs_handle_t nvs_handle;
+  nvs_open("weatherstation", NVS_READWRITE, &nvs_handle);
+
+  char ssid[64];
+  lv_dropdown_get_selected_str(ui_DropdownNetworks, ssid, sizeof(ssid));
+  put_string_to_nvs(nvs_handle, "ssid", ssid);
+
+  const char* password = lv_textarea_get_text(ui_TextAreaPassword);
+  put_string_to_nvs(nvs_handle, "password", password);
+
+  const char* appid = lv_textarea_get_text(ui_TextAreaAppId);
+  put_string_to_nvs(nvs_handle, "appid", appid);
+
+  const char* latitude = lv_textarea_get_text(ui_TextAreaLatitude);
+  put_string_to_nvs(nvs_handle, "latitude", latitude);
+
+  const char* longitude = lv_textarea_get_text(ui_TextAreaLongitude);
+  put_string_to_nvs(nvs_handle, "longitude", longitude);
+
+  const char* height = lv_textarea_get_text(ui_TextAreaHoehe);
+  put_string_to_nvs(nvs_handle, "height", height);
+
+  uint8_t region_id = lv_dropdown_get_selected(ui_DropdownRegion);
+  put_uint8_to_nvs(nvs_handle, "region", region_id);
+
+  uint8_t city_id = lv_dropdown_get_selected(ui_DropdownCity);
+  put_uint8_to_nvs(nvs_handle, "city", city_id);
+
+  const char* tz = NULL;
+  const char *region = regionNames[region_id];
+  for (size_t i = 0; i < sizeof(cityData) / sizeof(cityData[0]); i++)
+  {
+    if (strcmp(cityData[i][0], region) == 0)
+    {
+      tz = cityData[i + city_id][2];
+      break;
+    }
+  }
+  put_string_to_nvs(nvs_handle, "tz", tz);
+
+  const char* name_base = lv_textarea_get_text(ui_TextAreaBasis);
+  put_string_to_nvs(nvs_handle, "name_base", name_base);
+
+  const char* name_sensor_1 = lv_textarea_get_text(ui_TextAreaSensorName1);
+  put_string_to_nvs(nvs_handle, "name_sensor_1", name_sensor_1);
+
+  const char* name_sensor_2 = lv_textarea_get_text(ui_TextAreaSensorName2);
+  put_string_to_nvs(nvs_handle, "name_sensor_2", name_sensor_2);
+
+  const char* name_sensor_3 = lv_textarea_get_text(ui_TextAreaSensorName3);
+  put_string_to_nvs(nvs_handle, "name_sensor_3", name_sensor_3);
+
+  nvs_close(nvs_handle);
+
+  
+  set_labels();
+  wifi_start();
+  esp_now_start();
+  start_tasks();
+
 }
 

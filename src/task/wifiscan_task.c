@@ -29,6 +29,10 @@ void wifiscan_task(void *pvParameter) {
     disp_disable_scanbutton(true);
     xSemaphoreGiveRecursive(lvgl_mux);
 
+    if (esp_wifi_start() != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to start wifi");     
+    }
+
     ESP_ERROR_CHECK(esp_wifi_disconnect());
     vTaskDelay(pdMS_TO_TICKS(1000)); // Delay for 1 second
     
@@ -39,7 +43,7 @@ void wifiscan_task(void *pvParameter) {
         .show_hidden = true,
         .scan_type = WIFI_SCAN_TYPE_ACTIVE,
         .scan_time.active.min = 100,
-        .scan_time.active.max = 300,
+        .scan_time.active.max = 1000,
     };
 
     uint16_t ap_count = 16;
@@ -64,6 +68,8 @@ void wifiscan_task(void *pvParameter) {
     }
 
     free(ap_records);
+
+    ESP_ERROR_CHECK(esp_wifi_stop());
 
     xSemaphoreTakeRecursive(lvgl_mux, portMAX_DELAY);
     disp_wifi_networks(allNetworks);

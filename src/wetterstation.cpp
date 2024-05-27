@@ -5,7 +5,7 @@
 
 #include "config/config.h"
 
-#include "wifi/wifi.h"
+#include "wifi/network.h"
 #include "display/esp32_s3.h"
 #include "ui/ui.h"
 
@@ -19,7 +19,6 @@ extern "C" void app_main(void)
 
     init_wifi();
     init_display();
-
 
     ESP_LOGI(TAG, "Start LVGL");
 
