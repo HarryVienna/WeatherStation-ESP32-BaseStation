@@ -6,8 +6,7 @@
 #include "sensirion_common.h"
 #include "sensirion_i2c_hal.h"
 
-#include "../gui/gui.h"
-#include "../display/esp32_s3.h"
+#include "gui/gui.h"
 
 
 static const char* TAG = "sensor_task";

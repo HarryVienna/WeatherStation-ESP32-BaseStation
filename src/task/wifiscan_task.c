@@ -2,10 +2,8 @@
 #include "freertos/task.h"
 #include "esp_wifi.h"
 #include "esp_log.h"
-#include "nvs_flash.h"
 
-#include "../gui/gui.h"
-#include "../display/esp32_s3.h"
+#include "gui/gui.h"
 
 
 static const char* TAG = "wifiscan_task";

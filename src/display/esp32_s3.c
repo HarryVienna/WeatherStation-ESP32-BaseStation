@@ -12,7 +12,7 @@
 #include "lvgl.h"
 #include "esp32_s3.h"
 
-#include "../config/config.h"
+#include "config/config.h"
 
 // #define CONFIG_DOUBLE_FB 1
 

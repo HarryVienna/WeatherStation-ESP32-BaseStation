@@ -9,7 +9,7 @@
 #include "task/weather_task.h"
 #include "wifi/network.h"
 
-#include "../config/config.h"
+#include "config/config.h"
 
 static const char* TAG = "GUI";
 
@@ -210,7 +210,7 @@ void set_cities(const char *region)
 void set_labels() {
 
   nvs_handle_t nvs_handle;
-  nvs_open("weatherstation", NVS_READWRITE, &nvs_handle);
+  nvs_open("weatherstation", NVS_READONLY, &nvs_handle);
 
   char*  name_base = get_string_from_nvs(nvs_handle, "name_base", "");
   char*  name_sensor_1 = get_string_from_nvs(nvs_handle, "name_sensor_1", "");
@@ -271,7 +271,7 @@ void event_screen_loaded(lv_event_t *e)
 {
 
   nvs_handle_t nvs_handle;
-  nvs_open("weatherstation", NVS_READWRITE, &nvs_handle);
+  nvs_open("weatherstation", NVS_READONLY, &nvs_handle);
 
   char* ssid = get_string_from_nvs(nvs_handle, "ssid", "");
   char*  password = get_string_from_nvs(nvs_handle, "password", "");

@@ -6,9 +6,8 @@
 
 #include "wificonnect_task.h"
 
-#include "../wifi/network.h"
-#include "../gui/gui.h"
-#include "../display/esp32_s3.h"
+#include "wifi/network.h"
+#include "gui/gui.h"
 
 
 static const char* TAG = "wifiscan_task";

@@ -11,9 +11,7 @@
 #include "esp_tls.h"
 #include "esp_crt_bundle.h"
 
-#include "../gui/gui.h"
-#include "../display/esp32_s3.h"
-#include "../wifi/network.h"
+#include "gui/gui.h"
 
 #define MAX_HTTP_OUTPUT_BUFFER 24000
 

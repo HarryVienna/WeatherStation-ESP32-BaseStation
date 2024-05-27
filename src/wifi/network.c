@@ -5,7 +5,7 @@
 #include "nvs.h"
 #include "esp_log.h"
 
-#include <esp_now.h>
+#include "esp_now.h"
 #include "esp_wifi.h"
 #include "nvs_flash.h"
 #include "esp_event.h"
@@ -16,9 +16,9 @@
 
 #include "nvs/preferences.h"
 
-#include "../gui/gui.h"
+#include "gui/gui.h"
 
-#include "../config/config.h"
+#include "config/config.h"
 
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_FAIL_BIT      BIT1
@@ -165,7 +165,7 @@ void on_data_recv(const esp_now_recv_info_t *recv_info, const uint8_t *incoming_
     case PAIRING_REQ:
         uint8_t primary;
         wifi_second_chan_t second;
-        esp_err_t err = esp_wifi_get_channel(&primary, &second);
+        esp_wifi_get_channel(&primary, &second);
         add_peer(mac_addr, primary);
 
         struct_pairing_request pairingRequest;
@@ -330,7 +330,7 @@ bool wifi_connect(const char* ssid, const char* password) {
 void wifi_start() {
 
     nvs_handle_t nvs_handle;
-    nvs_open("weatherstation", NVS_READWRITE, &nvs_handle);
+    nvs_open("weatherstation", NVS_READONLY, &nvs_handle);
 
     char* ssid = get_string_from_nvs(nvs_handle, "ssid", "");
     char* password = get_string_from_nvs(nvs_handle, "password", "");
