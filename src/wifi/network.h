@@ -10,7 +10,7 @@ extern "C" {
 
 // Function declarations
 void init_wifi(void);
-bool wifi_connect(const char* ssid, const char* password);
+bool wifi_connect(const char* ssid, const char* password, bool retry_forever);
 void wifi_start();
 void esp_now_start();
 

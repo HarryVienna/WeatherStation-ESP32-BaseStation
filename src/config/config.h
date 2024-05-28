@@ -1,4 +1,5 @@
-
+#ifndef CONFIG_H
+#define CONFIG_H
 
 
 // Colors
@@ -80,3 +81,5 @@ static const char* DAY_NAMES[7] = { "So", "Mo", "Di", "Mi" , "Do" , "Fr" , "Sa" 
 #define LVGL_TASK_DELAY_MS   10
 #define LVGL_TASK_STACK_SIZE (4 * 1024)
 #define LVGL_TASK_PRIORITY   2
+
+#endif /* CONFIG_H */

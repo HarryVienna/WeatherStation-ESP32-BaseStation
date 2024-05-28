@@ -10,7 +10,7 @@
 #include "gui/gui.h"
 
 
-static const char* TAG = "wifiscan_task";
+static const char* TAG = "wificonnect_task";
 
 extern SemaphoreHandle_t lvgl_mux;
 
@@ -24,6 +24,7 @@ extern SemaphoreHandle_t lvgl_mux;
  *            Deletes the task once the connection attempt is finished.
  */
 void wificonnect_task(void *pvParameter) {
+
     ESP_LOGI(TAG, "Start wifiscan_task");
 
     xSemaphoreTakeRecursive(lvgl_mux, portMAX_DELAY);
@@ -32,7 +33,7 @@ void wificonnect_task(void *pvParameter) {
 
     local_wifi_sta_config_t *wifiParams = (local_wifi_sta_config_t *)pvParameter;
 
-    bool connected = wifi_connect(wifiParams->ssid, wifiParams->password);
+    bool connected = wifi_connect(wifiParams->ssid, wifiParams->password, false);
 
     xSemaphoreTakeRecursive(lvgl_mux, portMAX_DELAY);
     disp_connect_status(connected);

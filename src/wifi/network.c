@@ -23,6 +23,8 @@
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_FAIL_BIT      BIT1
 
+#define MAC_STR_LEN 18
+
 static const char* TAG = "WIFI";
 
 extern SemaphoreHandle_t lvgl_mux;
@@ -62,12 +64,10 @@ enum MessageType {
  * @details   Formats the MAC address provided as an array of uint8_t into a string.
  *            Prints the formatted MAC address to the Serial monitor.
  */
-void print_mac(const uint8_t * mac_addr){
-  char macStr[18];
-  snprintf(macStr, sizeof(macStr), "%02x:%02x:%02x:%02x:%02x:%02x",
-           mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]);
-
-  ESP_LOGI(TAG, "MAC: %s", macStr);
+char* get_mac_string(const uint8_t *mac_addr, char *macStrBuffer) {
+    snprintf(macStrBuffer, MAC_STR_LEN, "%02x:%02x:%02x:%02x:%02x:%02x",
+             mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]);
+    return macStrBuffer;
 }
 
 /**
@@ -113,9 +113,8 @@ void on_data_sent(const uint8_t *mac_addr, esp_now_send_status_t status) {
         ESP_LOGE(TAG, "Send cb arg error");
         return;
     }
-
-    ESP_LOGI(TAG, "Last Packet Send Status: %s", status == ESP_NOW_SEND_SUCCESS ? "Delivery Success to " : "Delivery Fail to ");
-    print_mac(mac_addr);
+    char mac[MAC_STR_LEN];
+    ESP_LOGI(TAG, "Last Packet Send to %s with status: %s ", get_mac_string(mac_addr, mac), status == ESP_NOW_SEND_SUCCESS ? "Success" : "Fail");
 }
 
 /**
@@ -138,10 +137,9 @@ void on_data_recv(const esp_now_recv_info_t *recv_info, const uint8_t *incoming_
         return;
     }
 
-    ESP_LOGI(TAG, "%d bytes of data received from : ", len);
+    char mac[MAC_STR_LEN];
+    ESP_LOGI(TAG, "%d bytes of data received from %s", len, get_mac_string(mac_addr, mac));
   
-    print_mac(mac_addr);
-
     uint8_t type = incoming_data[0];
     switch (type) {
     case DATA :
@@ -248,6 +246,7 @@ void init_wifi(void) {
 static EventGroupHandle_t s_wifi_event_group;
 
 static int s_retry_num = 0;
+static bool s_retry_forever = false;
 
 static void event_handler(void* arg, esp_event_base_t event_base,
                                 int32_t event_id, void* event_data)
@@ -256,7 +255,9 @@ static void event_handler(void* arg, esp_event_base_t event_base,
         esp_wifi_connect();
     } 
     else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
-        if (s_retry_num < 10) {
+        disp_wifi_status(false);
+
+        if (s_retry_forever || s_retry_num < 10) {
             esp_wifi_connect();
             s_retry_num++;
             ESP_LOGI(TAG, "retry to connect to the AP");
@@ -265,9 +266,12 @@ static void event_handler(void* arg, esp_event_base_t event_base,
         }
         ESP_LOGI(TAG,"connect to the AP fail");
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
+        disp_wifi_status(true);
+
         ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
         ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
         s_retry_num = 0;
+
         xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
     } 
 }
@@ -277,7 +281,7 @@ static void event_handler(void* arg, esp_event_base_t event_base,
  *
  * This function connects to WIFI
  */
-bool wifi_connect(const char* ssid, const char* password) {
+bool wifi_connect(const char* ssid, const char* password, bool retry_forever) {
 
     ESP_LOGI(TAG, "connecting to ap SSID: >%s<  password: >%s<", ssid, password);
 
@@ -297,10 +301,12 @@ bool wifi_connect(const char* ssid, const char* password) {
                                                         &event_handler,
                                                         NULL,
                                                         &instance_got_ip));
-    wifi_config_t wifi_config;
-    bzero(&wifi_config, sizeof(wifi_config_t));
+    wifi_config_t wifi_config = {};
     memcpy(wifi_config.sta.ssid, ssid, sizeof(wifi_config.sta.ssid));
     memcpy(wifi_config.sta.password, password, sizeof(wifi_config.sta.password));
+
+    s_retry_forever = retry_forever;
+    s_retry_num = 0;
 
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config) );
     ESP_ERROR_CHECK(esp_wifi_start());
@@ -339,7 +345,7 @@ void wifi_start() {
 
     nvs_close(nvs_handle);
 
-    wifi_connect(ssid, password);
+    wifi_connect(ssid, password, true);
 
     esp_sntp_setoperatingmode(SNTP_OPMODE_POLL);
     esp_sntp_setservername(0, NTP_SERVER);

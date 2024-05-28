@@ -87,7 +87,8 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
  *            Periodically calls the API, parses the received JSON data, and displays weather information.
  */
 void weather_task(void *pvParameter) {
-    ESP_LOGI(TAG, "Start Weather");
+    
+    ESP_LOGI(TAG, "Start Weather task");
 
 //wifi_connect();
     

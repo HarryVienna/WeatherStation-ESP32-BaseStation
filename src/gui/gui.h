@@ -5,6 +5,7 @@
 #include "../ui/ui.h"
 #include "../display/esp32_s3.h"
 
+void disp_wifi_status(bool status);
 void disp_date_time(char* date_time);
 void disp_sensor_data(uint8_t sensor_nr, double temperature, double humidity, double pressure, uint32_t voltage, char* date_time);
 void disp_scd4x(uint16_t co2);

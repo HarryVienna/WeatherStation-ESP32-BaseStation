@@ -1,8 +1,15 @@
+#include <math.h>
+
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
 #include "esp_log.h"
 
 #include "gui.h"
 
 #include "nvs/preferences.h"
+
+#include "task/clock_task.h"
 #include "task/wifiscan_task.h"
 #include "task/wificonnect_task.h"
 #include "task/sensor_task.h"
@@ -13,6 +20,7 @@
 
 static const char* TAG = "GUI";
 
+extern SemaphoreHandle_t lvgl_mux;
 
 const char *regionNames[] = {
     "Africa", "America", "Antarctica", "Arctic", "Asia", "Atlantic", "Australia", "Europe", "Indian", "Pacific"};
@@ -136,7 +144,61 @@ const char *cityData[][3] = {
     {"Pacific", "(GMT -10:00) Hawaii", "HST10"},
     {"Pacific", "(GMT -05:00) Easter Island", "EAST5"}};
 
+
+
+/**
+ * @brief     Calculate sea level pressure based on provided parameters
+ *
+ * @param     pressure      Atmospheric pressure at the measurement point (in hPa)
+ * @param     temperature   Temperature at the measurement point (in Celsius)
+ * @param     altitude      Altitude above sea level (in meters)
+ *
+ * @return    float         Sea level pressure calculated based on the parameters (in hPa)
+ *
+ * @details   Calculates and estimates the sea level pressure using the barometric formula.
+ *            Incorporates constants and calculations to adjust the pressure for altitude and temperature.
+ */
+float calc_sea_level_pressure(float pressure, float temperature, uint16_t altitude)
+{
+  // https://de.wikipedia.org/wiki/Barometrische_H%C3%B6henformel
+
+  // Konstanten
+  float g = 9.80665;  // Schwerebeschleunigung in m / s^2
+  float R = 287.05;   // Gaskonstante trockener Luft (= R/M)  in m^2/(s²K)
+  float a = 0.0065;   // vertikaler Temperaturgradient
+  float C_h = 0.12;   // Beiwert zur Berücksichtigung der mittleren Dampfdruckänderung K/hPa
+  float T_0 = 273.15; // Celsius to Kelvin
+
+  float E; // Dampfdruck des Wasserdampfanteils (in hPa)
+
+  if (temperature < 9.1)
+  {
+    E = 5.6402 * (-0.0916 + exp(0.06 * temperature));
+  }
+  else
+  {
+    E = 18.2194 * (1.0463 + exp(-0.0666 * temperature));
+  }
+
+  // Luftdruck auf Meereshöhe berechnen
+  float p = pressure * exp(altitude * g / (R * (temperature + T_0 + C_h * E + a * (altitude / 2))));
+
+  return p;
+}
+
 // -------- Weatherstation Screen --------
+
+void disp_wifi_status(bool status)
+{
+  if (status)
+  {
+    lv_img_set_src(ui_Wifi, &ui_img_wifi_on_png);
+  }
+  else
+  {
+    lv_img_set_src(ui_Wifi, &ui_img_wifi_off_png);
+  }
+}
 
 void disp_date_time(char *date_time)
 {
@@ -145,6 +207,106 @@ void disp_date_time(char *date_time)
 
 void disp_sensor_data(uint8_t sensor_nr, double temperature, double humidity, double pressure, uint32_t voltage, char *date_time)
 {
+
+  nvs_handle_t nvs_handle;
+  nvs_open("weatherstation", NVS_READONLY, &nvs_handle);
+
+  const char* height_c = get_string_from_nvs(nvs_handle, "height", "0");
+
+  nvs_close(nvs_handle);
+
+  uint16_t height = atol(height_c);
+
+  pressure = calc_sea_level_pressure(pressure, temperature, height);
+
+  char temperature_value[16];
+  char humidity_value[16];
+  char pressure_value[16];
+  char voltage_value[16];
+
+  sprintf(temperature_value, "%.1f", temperature);
+  sprintf(humidity_value, "%.1f", humidity);
+  sprintf(pressure_value, "%.0f", pressure);
+  sprintf(voltage_value, "%.1f V", voltage / 1000.0);
+
+  float voltage_rounded;
+  sscanf(voltage_value, "%f", &voltage_rounded);
+
+  switch (sensor_nr)
+  {
+  case 0:
+    lv_label_set_text(ui_Temp0, temperature_value);
+    lv_label_set_text(ui_Hunidity0, humidity_value);
+    lv_label_set_text(ui_Pressure0, pressure_value);
+    lv_label_set_text(ui_Volt0, voltage_value);
+    lv_label_set_text(ui_Update0, date_time);
+
+    if (voltage_rounded >= 4.0)
+    {
+      lv_obj_set_style_bg_color(ui_LineStatus0, lv_color_hex(COLOR_GREEN), LV_PART_MAIN | LV_STATE_DEFAULT);
+    }
+    else if (voltage_rounded >= 3.8)
+    {
+      lv_obj_set_style_bg_color(ui_LineStatus0, lv_color_hex(COLOR_LIGHTGREEN), LV_PART_MAIN | LV_STATE_DEFAULT);
+    }
+    else if (voltage_rounded >= 3.6)
+    {
+      lv_obj_set_style_bg_color(ui_LineStatus0, lv_color_hex(COLOR_ORANGE), LV_PART_MAIN | LV_STATE_DEFAULT);
+    }
+    else
+    {
+      lv_obj_set_style_bg_color(ui_LineStatus0, lv_color_hex(COLOR_RED), LV_PART_MAIN | LV_STATE_DEFAULT);
+    }
+    break;
+  case 1:
+    lv_label_set_text(ui_Temp1, temperature_value);
+    lv_label_set_text(ui_Hunidity1, humidity_value);
+    lv_label_set_text(ui_Pressure1, pressure_value);
+    lv_label_set_text(ui_Volt1, voltage_value);
+    lv_label_set_text(ui_Update1, date_time);
+    if (voltage_rounded >= 4.0)
+    {
+      lv_obj_set_style_bg_color(ui_LineStatus1, lv_color_hex(COLOR_GREEN), LV_PART_MAIN | LV_STATE_DEFAULT);
+    }
+    else if (voltage_rounded >= 3.8)
+    {
+      lv_obj_set_style_bg_color(ui_LineStatus1, lv_color_hex(COLOR_LIGHTGREEN), LV_PART_MAIN | LV_STATE_DEFAULT);
+    }
+    else if (voltage_rounded >= 3.6)
+    {
+      lv_obj_set_style_bg_color(ui_LineStatus1, lv_color_hex(COLOR_ORANGE), LV_PART_MAIN | LV_STATE_DEFAULT);
+    }
+    else
+    {
+      lv_obj_set_style_bg_color(ui_LineStatus1, lv_color_hex(COLOR_RED), LV_PART_MAIN | LV_STATE_DEFAULT);
+    }
+    break;
+  case 2:
+    lv_label_set_text(ui_Temp2, temperature_value);
+    lv_label_set_text(ui_Hunidity2, humidity_value);
+    lv_label_set_text(ui_Pressure2, pressure_value);
+    lv_label_set_text(ui_Volt2, voltage_value);
+    lv_label_set_text(ui_Update2, date_time);
+    if (voltage_rounded >= 4.0)
+    {
+      lv_obj_set_style_bg_color(ui_LineStatus2, lv_color_hex(COLOR_GREEN), LV_PART_MAIN | LV_STATE_DEFAULT);
+    }
+    else if (voltage_rounded >= 3.8)
+    {
+      lv_obj_set_style_bg_color(ui_LineStatus2, lv_color_hex(COLOR_LIGHTGREEN), LV_PART_MAIN | LV_STATE_DEFAULT);
+    }
+    else if (voltage_rounded >= 3.6)
+    {
+      lv_obj_set_style_bg_color(ui_LineStatus2, lv_color_hex(COLOR_ORANGE), LV_PART_MAIN | LV_STATE_DEFAULT);
+    }
+    else
+    {
+      lv_obj_set_style_bg_color(ui_LineStatus2, lv_color_hex(COLOR_RED), LV_PART_MAIN | LV_STATE_DEFAULT);
+    }
+    break;
+  default:
+    break;
+  }
 }
 
 // -------- Setup Screen --------
@@ -228,14 +390,14 @@ void set_labels() {
 void start_tasks()
 {
 
-  // xTaskCreatePinnedToCore(
-  //     clock_task,   /* Task function. */
-  //     "Clock Task", /* String with name of task. */
-  //     4096,         /* Stack size in bytes. */
-  //     NULL,         /* Parameter passed as input of the task */
-  //     1,            /* Priority of the task. */
-  //     NULL,         /* Task handle. */
-  //     1);           /* Clock task on core 0*/
+  xTaskCreatePinnedToCore(
+      clock_task,   /* Task function. */
+      "Clock Task", /* String with name of task. */
+      4096,         /* Stack size in bytes. */
+      NULL,         /* Parameter passed as input of the task */
+      1,            /* Priority of the task. */
+      NULL,         /* Task handle. */
+      1);           /* Clock task on core 0*/
 
   // xTaskCreatePinnedToCore(
   //     sensor_task,    

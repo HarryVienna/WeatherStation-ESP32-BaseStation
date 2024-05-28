@@ -24,7 +24,7 @@ extern SemaphoreHandle_t lvgl_mux;
  *            Deletes the task once the scan is complete.
  */
 void sensor_task(void *pvParameter) {
-    ESP_LOGI(TAG, "Start Sensirion");
+    ESP_LOGI(TAG, "Start Sensor task");
     
     int16_t error = 0;
 
