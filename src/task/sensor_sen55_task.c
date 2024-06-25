@@ -23,10 +23,12 @@ extern SemaphoreHandle_t lvgl_mux;
  *            Displays the scanned Wi-Fi networks on the device's display.
  *            Deletes the task once the scan is complete.
  */
-void sensor_task(void *pvParameter) {
+void sensor_sen55_task(void *pvParameter) {
     ESP_LOGI(TAG, "Start Sensor task");
     
     int16_t error = 0;
+
+    //sensirion_i2c_hal_init();
 
     error = sen5x_device_reset();
     if (error) {

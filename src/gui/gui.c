@@ -12,7 +12,8 @@
 #include "task/clock_task.h"
 #include "task/wifiscan_task.h"
 #include "task/wificonnect_task.h"
-#include "task/sensor_task.h"
+#include "task/sensor_scd41_task.h"
+#include "task/sensor_sen55_task.h"
 #include "task/weather_task.h"
 #include "wifi/network.h"
 
@@ -399,14 +400,23 @@ void start_tasks()
       NULL,         /* Task handle. */
       1);           /* Clock task on core 0*/
 
-  // xTaskCreatePinnedToCore(
-  //     sensor_task,    
-  //     "Sensor Task",  
-  //     4096,          
-  //     NULL,           
-  //     1,       
-  //     NULL,       
-  //     1);
+  xTaskCreatePinnedToCore(
+      sensor_sen55_task,    
+      "Sensor SEN55 Task",  
+      4096,          
+      NULL,           
+      1,       
+      NULL,       
+      1);
+
+  xTaskCreatePinnedToCore(
+      sensor_scd41_task,    
+      "Sensor SCD41 Task",  
+      4096,          
+      NULL,           
+      1,       
+      NULL,       
+      1);      
 
   // xTaskCreatePinnedToCore(
   //     brightness_task,

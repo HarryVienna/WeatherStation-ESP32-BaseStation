@@ -336,9 +336,9 @@ static void lvgl_flush_cb(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t 
     int offsety2 = area->y2;
 
     // LVGL has finished
-    xSemaphoreGive(sem_gui_ready);
+    //xSemaphoreGive(sem_gui_ready);
     // Now wait for the VSYNC event. 
-    xSemaphoreTake(sem_vsync_end, portMAX_DELAY);
+    //xSemaphoreTake(sem_vsync_end, portMAX_DELAY);
 
     // pass the draw buffer to the driver
     esp_lcd_panel_draw_bitmap(panel_handle, offsetx1, offsety1, offsetx2 + 1, offsety2 + 1, color_map);
@@ -365,10 +365,10 @@ static bool on_vsync_event(esp_lcd_panel_handle_t panel, const esp_lcd_rgb_panel
     BaseType_t high_task_awoken = pdFALSE;
 
     // Wait until LVGL has finished 
-    if (xSemaphoreTakeFromISR(sem_gui_ready, &high_task_awoken) == pdTRUE) {
+    //if (xSemaphoreTakeFromISR(sem_gui_ready, &high_task_awoken) == pdTRUE) {
         // Indicate that the VSYNC event has ended, and it's safe to proceed with flushing the buffer.
         xSemaphoreGiveFromISR(sem_vsync_end, &high_task_awoken);
-    }
+    //}
 
     return high_task_awoken == pdTRUE;
 }
