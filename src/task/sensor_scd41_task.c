@@ -13,14 +13,12 @@ static const char* TAG = "sensor_scd41_task";
 extern SemaphoreHandle_t lvgl_mux;
 
 /**
- * @brief     Task for scanning nearby Wi-Fi networks
+ * @brief     Task for reading sensor data and displaying information
  *
  * @param     pvParameter   Pointer to task parameters (not used in this function)
  *
- * @details   Initiates Wi-Fi scanning to discover nearby networks and their signal strengths.
- *            Prints the scanned networks and their information.
- *            Displays the scanned Wi-Fi networks on the device's display.
- *            Deletes the task once the scan is complete.
+ * @details   Initializes and reads data from two sensors (SCD41).
+ *            Monitors and retrieves sensor measurements, displaying them periodically.
  */
 void sensor_scd41_task(void *pvParameter) {
     ESP_LOGI(TAG, "Start Sensor SCD41 task");
