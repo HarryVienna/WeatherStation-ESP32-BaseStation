@@ -310,6 +310,174 @@ void disp_sensor_data(uint8_t sensor_nr, double temperature, double humidity, do
   }
 }
 
+void disp_scd4x(uint16_t co2)
+{
+  if (co2 <= 600)
+  {
+    lv_obj_set_style_bg_color(ui_CO2, lv_color_hex(COLOR_GREEN), LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+  else if (co2 <= 1000)
+  {
+    lv_obj_set_style_bg_color(ui_CO2, lv_color_hex(COLOR_LIGHTGREEN), LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+  else if (co2 <= 1500)
+  {
+    lv_obj_set_style_bg_color(ui_CO2, lv_color_hex(COLOR_YELLOW), LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+  else if (co2 <= 1900)
+  {
+    lv_obj_set_style_bg_color(ui_CO2, lv_color_hex(COLOR_ORANGE), LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+  else
+  {
+    lv_obj_set_style_bg_color(ui_CO2, lv_color_hex(COLOR_RED), LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+}
+
+void disp_sen5x(float ambientTemperature, float ambientHumidity, float massConcentrationPm1p0, float massConcentrationPm2p5, float massConcentrationPm4p0, float massConcentrationPm10p0, float vocIndex, float noxIndex)
+{
+
+  if (!isnan(ambientTemperature))
+  {
+    char temp[8];
+    sprintf(temp, "%.1f", ambientTemperature);
+    lv_label_set_text(ui_TempBase, temp);
+  }
+
+  if (!isnan(ambientHumidity))
+  {
+    char humidity[8];
+    sprintf(humidity, "%.1f", ambientHumidity);
+    lv_label_set_text(ui_HumidityBase, humidity);
+  }
+
+  if (massConcentrationPm1p0 <= 11.6)
+  {
+    lv_obj_set_style_bg_color(ui_PM1, lv_color_hex(COLOR_GREEN), LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+  else if (massConcentrationPm1p0 <= 32)
+  {
+    lv_obj_set_style_bg_color(ui_PM1, lv_color_hex(COLOR_LIGHTGREEN), LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+  else if (massConcentrationPm1p0 <= 50)
+  {
+    lv_obj_set_style_bg_color(ui_PM1, lv_color_hex(COLOR_YELLOW), LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+  else if (massConcentrationPm1p0 <= 68)
+  {
+    lv_obj_set_style_bg_color(ui_PM1, lv_color_hex(COLOR_ORANGE), LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+  else
+  {
+    lv_obj_set_style_bg_color(ui_PM1, lv_color_hex(COLOR_RED), LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+
+  if (massConcentrationPm2p5 <= 13)
+  {
+    lv_obj_set_style_bg_color(ui_PM2p5, lv_color_hex(COLOR_GREEN), LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+  else if (massConcentrationPm2p5 <= 35)
+  {
+    lv_obj_set_style_bg_color(ui_PM2p5, lv_color_hex(COLOR_LIGHTGREEN), LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+  else if (massConcentrationPm2p5 <= 55)
+  {
+    lv_obj_set_style_bg_color(ui_PM2p5, lv_color_hex(COLOR_YELLOW), LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+  else if (massConcentrationPm2p5 <= 75)
+  {
+    lv_obj_set_style_bg_color(ui_PM2p5, lv_color_hex(COLOR_ORANGE), LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+  else
+  {
+    lv_obj_set_style_bg_color(ui_PM2p5, lv_color_hex(COLOR_RED), LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+
+  if (massConcentrationPm4p0 <= 14.4)
+  {
+    lv_obj_set_style_bg_color(ui_PM4, lv_color_hex(COLOR_GREEN), LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+  else if (massConcentrationPm4p0 <= 38)
+  {
+    lv_obj_set_style_bg_color(ui_PM4, lv_color_hex(COLOR_LIGHTGREEN), LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+  else if (massConcentrationPm4p0 <= 60)
+  {
+    lv_obj_set_style_bg_color(ui_PM4, lv_color_hex(COLOR_YELLOW), LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+  else if (massConcentrationPm4p0 <= 82)
+  {
+    lv_obj_set_style_bg_color(ui_PM4, lv_color_hex(COLOR_ORANGE), LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+  else
+  {
+    lv_obj_set_style_bg_color(ui_PM4, lv_color_hex(COLOR_RED), LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+
+  if (massConcentrationPm10p0 <= 20)
+  {
+    lv_obj_set_style_bg_color(ui_PM10, lv_color_hex(COLOR_GREEN), LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+  else if (massConcentrationPm10p0 <= 50)
+  {
+    lv_obj_set_style_bg_color(ui_PM10, lv_color_hex(COLOR_LIGHTGREEN), LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+  else if (massConcentrationPm10p0 <= 80)
+  {
+    lv_obj_set_style_bg_color(ui_PM10, lv_color_hex(COLOR_YELLOW), LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+  else if (massConcentrationPm10p0 <= 110)
+  {
+    lv_obj_set_style_bg_color(ui_PM10, lv_color_hex(COLOR_ORANGE), LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+  else
+  {
+    lv_obj_set_style_bg_color(ui_PM10, lv_color_hex(COLOR_RED), LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+
+  if (vocIndex <= 50)
+  {
+    lv_obj_set_style_bg_color(ui_VOC, lv_color_hex(COLOR_GREEN), LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+  else if (vocIndex <= 150)
+  {
+    lv_obj_set_style_bg_color(ui_VOC, lv_color_hex(COLOR_LIGHTGREEN), LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+  else if (vocIndex <= 250)
+  {
+    lv_obj_set_style_bg_color(ui_VOC, lv_color_hex(COLOR_YELLOW), LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+  else if (vocIndex <= 400)
+  {
+    lv_obj_set_style_bg_color(ui_VOC, lv_color_hex(COLOR_ORANGE), LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+  else
+  {
+    lv_obj_set_style_bg_color(ui_VOC, lv_color_hex(COLOR_RED), LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+
+  if (noxIndex <= 1)
+  {
+    lv_obj_set_style_bg_color(ui_NOX, lv_color_hex(COLOR_GREEN), LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+  else if (noxIndex <= 20)
+  {
+    lv_obj_set_style_bg_color(ui_NOX, lv_color_hex(COLOR_LIGHTGREEN), LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+  else if (noxIndex <= 150)
+  {
+    lv_obj_set_style_bg_color(ui_NOX, lv_color_hex(COLOR_YELLOW), LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+  else if (noxIndex <= 300)
+  {
+    lv_obj_set_style_bg_color(ui_NOX, lv_color_hex(COLOR_ORANGE), LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+  else
+  {
+    lv_obj_set_style_bg_color(ui_NOX, lv_color_hex(COLOR_RED), LV_PART_MAIN | LV_STATE_DEFAULT);
+  }
+}
+
 // -------- Setup Screen --------
 
 void disp_wifi_networks(char* allNetworks)

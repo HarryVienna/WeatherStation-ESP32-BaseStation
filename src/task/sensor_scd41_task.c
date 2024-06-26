@@ -8,8 +8,7 @@
 
 #include "gui/gui.h"
 
-
-static const char* TAG = "sensor_task";
+static const char* TAG = "sensor_scd41_task";
 
 extern SemaphoreHandle_t lvgl_mux;
 
@@ -24,7 +23,7 @@ extern SemaphoreHandle_t lvgl_mux;
  *            Deletes the task once the scan is complete.
  */
 void sensor_scd41_task(void *pvParameter) {
-    ESP_LOGI(TAG, "Start Sensor task");
+    ESP_LOGI(TAG, "Start Sensor SCD41 task");
     
     int16_t error = 0;
 
@@ -40,28 +39,25 @@ void sensor_scd41_task(void *pvParameter) {
     uint16_t serial_2;
     error = scd4x_get_serial_number(&serial_0, &serial_1, &serial_2);
     if (error) {
-        printf("Error executing scd4x_get_serial_number(): %i\n", error);
+        ESP_LOGE(TAG, "Error executing scd4x_get_serial_number(): %i", error);
     } else {
-        printf("serial: 0x%04x%04x%04x\n", serial_0, serial_1, serial_2);
+        ESP_LOGI(TAG, "serial: 0x%04x%04x%04x", serial_0, serial_1, serial_2);
     }
 
     // Start Measurement
 
     error = scd4x_start_periodic_measurement();
     if (error) {
-        printf("Error executing scd4x_start_periodic_measurement(): %i\n",
-               error);
+        ESP_LOGE(TAG, "Error executing scd4x_start_periodic_measurement(): %i", error);
     }
-
-    printf("Waiting for first measurement... (5 sec)\n");
 
     for (;;) {
         // Read Measurement
-        sensirion_i2c_hal_sleep_usec(100000);
+        vTaskDelay(pdMS_TO_TICKS(5000));
         bool data_ready_flag = false;
         error = scd4x_get_data_ready_flag(&data_ready_flag);
         if (error) {
-            printf("Error executing scd4x_get_data_ready_flag(): %i\n", error);
+            ESP_LOGE(TAG, "Error executing scd4x_get_data_ready_flag(): %i", error);
             continue;
         }
         if (!data_ready_flag) {
@@ -73,13 +69,15 @@ void sensor_scd41_task(void *pvParameter) {
         int32_t humidity;
         error = scd4x_read_measurement(&co2, &temperature, &humidity);
         if (error) {
-            printf("Error executing scd4x_read_measurement(): %i\n", error);
+            ESP_LOGE(TAG, "Error executing scd4x_read_measurement(): %i", error);
         } else if (co2 == 0) {
-            printf("Invalid sample detected, skipping.\n");
+            ESP_LOGE(TAG, "Invalid sample detected, skipping.");
         } else {
-            printf("CO2: %u\n", co2);
-            printf("Temperature: %lu m°C\n", temperature);
-            printf("Humidity: %lu mRH\n", humidity);
+            ESP_LOGI(TAG, "CO2: %u   Temperature: %.1f m°C   Humidity: %.1f mRH", co2, temperature/1000.0f, humidity/1000.0f);
+
+            xSemaphoreTakeRecursive(lvgl_mux, portMAX_DELAY);
+            disp_scd4x(co2);
+            xSemaphoreGiveRecursive(lvgl_mux);
         }
     }
 
