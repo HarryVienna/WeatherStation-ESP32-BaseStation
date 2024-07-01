@@ -595,14 +595,14 @@ void start_tasks()
   //     NULL,
   //     1);
 
-  // xTaskCreatePinnedToCore(
-  //     weather_task,
-  //     "Weather Task",
-  //     16384,
-  //     NULL,
-  //     1,
-  //     NULL,
-  //     1);
+  xTaskCreatePinnedToCore(
+      weather_task,
+      "Weather Task",
+      16384,
+      NULL,
+      1,
+      NULL,
+      1);
 }
 
 // -------- LVGL Events --------
@@ -614,17 +614,17 @@ void event_screen_loaded(lv_event_t *e)
   nvs_open("weatherstation", NVS_READONLY, &nvs_handle);
 
   char* ssid = get_string_from_nvs(nvs_handle, "ssid", "");
-  char*  password = get_string_from_nvs(nvs_handle, "password", "");
-  char*  appid = get_string_from_nvs(nvs_handle, "appid", "");
-  char*  latitude = get_string_from_nvs(nvs_handle, "latitude", "");
-  char*  longitude = get_string_from_nvs(nvs_handle, "longitude", "");
-  char*  height = get_string_from_nvs(nvs_handle, "height", "");
+  char* password = get_string_from_nvs(nvs_handle, "password", "");
+  char* appid = get_string_from_nvs(nvs_handle, "appid", "");
+  char* latitude = get_string_from_nvs(nvs_handle, "latitude", "");
+  char* longitude =get_string_from_nvs(nvs_handle, "longitude", "");
+  char* height = get_string_from_nvs(nvs_handle, "height", "");
   uint8_t region_id = get_uint8_from_nvs(nvs_handle, "region", 0);
   uint8_t city_id = get_uint8_from_nvs(nvs_handle, "city", 0);
-  char*  name_base = get_string_from_nvs(nvs_handle, "name_base", "");
-  char*  name_sensor_1 = get_string_from_nvs(nvs_handle, "name_sensor_1", "");
-  char*  name_sensor_2 =get_string_from_nvs(nvs_handle, "name_sensor_2", "");
-  char*  name_sensor_3 = get_string_from_nvs(nvs_handle, "name_sensor_3", "");
+  char* name_base = get_string_from_nvs(nvs_handle, "name_base", "");
+  char* name_sensor_1 = get_string_from_nvs(nvs_handle, "name_sensor_1", "");
+  char* name_sensor_2 =get_string_from_nvs(nvs_handle, "name_sensor_2", "");
+  char* name_sensor_3 = get_string_from_nvs(nvs_handle, "name_sensor_3", "");
 
   nvs_close(nvs_handle);
 
