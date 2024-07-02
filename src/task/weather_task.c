@@ -13,9 +13,12 @@
 
 #include "gui/gui.h"
 
+#include "weather_task.h"
+#include "weather/open_meteo.h"
+
 #include "cJSON.h"
 
-static const char *WEATHER_URL = "https://api.open-meteo.com/v1/forecast?latitude=48.2167&longitude=16.3&current=temperature_2m,relative_humidity_2m,is_day,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m&hourly=temperature_2m,precipitation_probability,rain,showers,snowfall,cloud_cover,wind_speed_10m,wind_gusts_10m&timezone=Europe%2FBerlin&forecast_days=14";
+static const char *WEATHER_URL_HOURLY = "https://api.open-meteo.com/v1/forecast?latitude=48.2167&longitude=16.3&hourly=temperature_2m,relative_humidity_2m,precipitation_probability,rain,showers,snowfall,weather_code,wind_speed_10m,wind_gusts_10m,uv_index,is_day,sunshine_duration&timeformat=unixtime&timezone=auto&forecast_days=3";
 
 static const char* TAG = "weather_task";
 
@@ -26,21 +29,7 @@ typedef struct {
     int buffer_len;
 } http_response_t;
 
-typedef struct {
-    struct tm time;           // Store the time in a struct tm
-    double temperature_2m;    // Temperature in °C
-    double relative_humidity_2m; // Relative humidity in %
-    double precipitation_probability; // Precipitation probability in %
-    double rain;             // Rain amount in mm
-    double showers;          // Shower amount in mm
-    double snowfall;         // Snowfall amount in cm
-    int weather_code;        // WMO weather code
-    double wind_speed_10m;   // Wind speed in km/h
-    double wind_gusts_10m;   // Wind gusts in km/h
-    double uv_index;         // UV index
-    bool is_day;             // Boolean to indicate if it's day or night
-    double sunshine_duration; // Sunshine duration in seconds
-} hourly_weather_data_t;
+
 
 esp_err_t _http_event_handler(esp_http_client_event_t *evt)
 {
@@ -85,6 +74,7 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
     return ESP_OK;
 }
 
+
 /**
  * @brief     Task for retrieving and displaying weather data from an API
  *
@@ -96,11 +86,14 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
 void weather_task(void *pvParameter) {
     
     ESP_LOGI(TAG, "Start Weather task");
+
+    // Create an array to store HourlyWeatherData structs
+    hourly_weather_data_t hourly_data[48];
     
     http_response_t response = {0};
 
     esp_http_client_config_t config = {
-        .url = WEATHER_URL,
+        .url = WEATHER_URL_HOURLY,
         .event_handler = _http_event_handler,
         .crt_bundle_attach = esp_crt_bundle_attach,
         .user_data =  &response, // Pass the response buffer to the event handler
@@ -118,7 +111,7 @@ void weather_task(void *pvParameter) {
             ESP_LOGI(TAG, "HTTP GET Status = %d, content_length = %"PRId64,
                     esp_http_client_get_status_code(client),
                     esp_http_client_get_content_length(client));
-            ESP_LOGI(TAG, "JSON %s", response.buffer);
+            //ESP_LOGI(TAG, "JSON %s", response.buffer);
 
             
             // Parse JSON response
@@ -130,42 +123,63 @@ void weather_task(void *pvParameter) {
                 }
             }
             else {
-
-                time_t rawtime;
-                struct tm timeinfo; // Note: no pointer here
-                time(&rawtime);
-                localtime_r(&rawtime, &timeinfo); // Pass &timeinfo as the result buffer
+                struct tm timeinfo;
+                time_t now;
+                time(&now);
+                localtime_r(&now, &timeinfo);
 
                 int currentHour = timeinfo.tm_hour;
 
                 cJSON *hourly = cJSON_GetObjectItem(json, "hourly");
-
-                // Create an array to store HourlyWeatherData structs
-                hourly_weather_data_t hourly_data[48];
+                cJSON *time = cJSON_GetObjectItem(hourly, "time");
+                cJSON *temperature_2m = cJSON_GetObjectItem(hourly, "temperature_2m");
+                cJSON *relative_humidity_2m = cJSON_GetObjectItem(hourly, "relative_humidity_2m");
+                cJSON *precipitation_probability = cJSON_GetObjectItem(hourly, "precipitation_probability");
+                cJSON *rain = cJSON_GetObjectItem(hourly, "rain");
+                cJSON *showers = cJSON_GetObjectItem(hourly, "showers");
+                cJSON *snowfall = cJSON_GetObjectItem(hourly, "snowfall");
+                cJSON *weather_code = cJSON_GetObjectItem(hourly, "weather_code");
+                cJSON *wind_speed_10m = cJSON_GetObjectItem(hourly, "wind_speed_10m");
+                cJSON *wind_gusts_10m = cJSON_GetObjectItem(hourly, "wind_gusts_10m");
+                cJSON *uv_index = cJSON_GetObjectItem(hourly, "uv_index");
+                cJSON *is_day = cJSON_GetObjectItem(hourly, "is_day");
+                cJSON *sunshine_duration = cJSON_GetObjectItem(hourly, "sunshine_duration");
 
                 // Iterate through the "hourly" data array
-                for (int i = currentHour; i < currentHour + 48; i++) {
-                    cJSON *hour = cJSON_GetArrayItem(hourly, i); 
+                for (int i = 0; i < 48; i++) {
 
-                    // Extract time as Unix timestamp
-                    cJSON *timeItem = cJSON_GetObjectItem(hour, "time");
-                    time_t unixTimestamp = timeItem->valueint;
+                    time_t unixTimestamp = (time_t)cJSON_GetArrayItem(time, i + currentHour)->valueint;
                     localtime_r(&unixTimestamp, &hourly_data[i].time); 
+                    hourly_data[i].temperature_2m = cJSON_GetArrayItem(temperature_2m, i + currentHour)->valuedouble;
+                    hourly_data[i].relative_humidity_2m = cJSON_GetArrayItem(relative_humidity_2m, i + currentHour)->valuedouble;
+                    hourly_data[i].precipitation_probability = cJSON_GetArrayItem(precipitation_probability, i + currentHour)->valuedouble;
+                    hourly_data[i].rain = cJSON_GetArrayItem(rain, i + currentHour)->valuedouble;
+                    hourly_data[i].showers = cJSON_GetArrayItem(showers, i + currentHour)->valuedouble;
+                    hourly_data[i].snowfall = cJSON_GetArrayItem(snowfall, i + currentHour)->valuedouble;
+                    hourly_data[i].weather_code = cJSON_GetArrayItem(weather_code, i + currentHour)->valueint;
+                    hourly_data[i].wind_speed_10m = cJSON_GetArrayItem(wind_speed_10m, i + currentHour)->valuedouble;
+                    hourly_data[i].wind_gusts_10m = cJSON_GetArrayItem(wind_gusts_10m, i + currentHour)->valuedouble;
+                    hourly_data[i].uv_index = cJSON_GetArrayItem(uv_index, i + currentHour)->valuedouble;
+                    hourly_data[i].is_day = cJSON_GetArrayItem(is_day, i + currentHour)->valueint;
+                    hourly_data[i].sunshine_duration = cJSON_GetArrayItem(sunshine_duration, i + currentHour)->valuedouble;
 
-                    hourly_data[i].temperature_2m = cJSON_GetObjectItem(hour, "temperature_2m")->valuedouble;
-                    hourly_data[i].relative_humidity_2m = cJSON_GetObjectItem(hour, "relative_humidity_2m")->valuedouble;
-                    hourly_data[i].precipitation_probability = cJSON_GetObjectItem(hour, "precipitation_probability")->valuedouble;
-                    hourly_data[i].rain = cJSON_GetObjectItem(hour, "rain")->valuedouble;
-                    hourly_data[i].showers = cJSON_GetObjectItem(hour, "showers")->valuedouble;
-                    hourly_data[i].snowfall = cJSON_GetObjectItem(hour, "snowfall")->valuedouble;
-                    hourly_data[i].weather_code = cJSON_GetObjectItem(hour, "weather_code")->valueint;
-                    hourly_data[i].wind_speed_10m = cJSON_GetObjectItem(hour, "wind_speed_10m")->valuedouble;
-                    hourly_data[i].wind_gusts_10m = cJSON_GetObjectItem(hour, "wind_gusts_10m")->valuedouble;
-                    hourly_data[i].uv_index = cJSON_GetObjectItem(hour, "uv_index")->valuedouble;
-                    hourly_data[i].is_day = cJSON_IsTrue(cJSON_GetObjectItem(hour, "is_day"));
-                    hourly_data[i].sunshine_duration = cJSON_GetObjectItem(hour, "sunshine_duration")->valuedouble;
+                    // ESP_LOGI(TAG, "Time: %04d-%02d-%02dT%02d:%02d, Temp: %.1f°C, Humidity: %.1f%%, Precip Prob: %.1f%%, Rain: %.2fmm, Showers: %.2fmm, Snow: %.2fcm",
+                    //     hourly_data[i].time.tm_year + 1900, hourly_data[i].time.tm_mon + 1, hourly_data[i].time.tm_mday,
+                    //     hourly_data[i].time.tm_hour, hourly_data[i].time.tm_min, hourly_data[i].temperature_2m,
+                    //     hourly_data[i].relative_humidity_2m, hourly_data[i].precipitation_probability,
+                    //     hourly_data[i].rain, hourly_data[i].showers, hourly_data[i].snowfall);
+
+                    // ESP_LOGI(TAG, "Code: %d, Wind Speed: %.1fkm/h, Gusts: %.1fkm/h, UV: %.2f, Is Day: %d, Sunshine: %.1fs",                       
+                    //     hourly_data[i].weather_code, hourly_data[i].wind_speed_10m,
+                    //     hourly_data[i].wind_gusts_10m, hourly_data[i].uv_index,
+                    //     hourly_data[i].is_day, hourly_data[i].sunshine_duration);    
  
+
                 }
+
+                xSemaphoreTakeRecursive(lvgl_mux, portMAX_DELAY);
+                disp_weather(hourly_data);
+                xSemaphoreGiveRecursive(lvgl_mux);                
             }
             
             cJSON_Delete(json);

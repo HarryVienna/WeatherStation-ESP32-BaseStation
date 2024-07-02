@@ -4,6 +4,8 @@
 // Project name: SquareLine_Project
 
 #include "../ui.h"
+#include "lvgl/lv_hourly_chart.h"
+#include "lvgl/lv_daily_chart.h"
 
 void ui_WeatherstationScreen_screen_init(void)
 {
@@ -1959,20 +1961,26 @@ void ui_WeatherstationScreen_screen_init(void)
     lv_obj_set_style_border_color(ui_Hourly, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_opa(ui_Hourly, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui_Hourly, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_left(ui_Hourly, 30, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_right(ui_Hourly, 25, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_left(ui_Hourly, 38, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_right(ui_Hourly, 24, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_top(ui_Hourly, 15, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_bottom(ui_Hourly, 35, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(ui_Hourly, 38, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_HourlyChart = lv_chart_create(ui_Hourly);
+    ui_HourlyChart = lv_hourly_chart_create(ui_Hourly);
     lv_obj_set_width(ui_HourlyChart, lv_pct(100));
     lv_obj_set_height(ui_HourlyChart, lv_pct(100));
     lv_obj_set_align(ui_HourlyChart, LV_ALIGN_CENTER);
-    lv_chart_set_type(ui_HourlyChart, LV_CHART_TYPE_LINE);
-    lv_chart_set_axis_tick(ui_HourlyChart, LV_CHART_AXIS_PRIMARY_X, 10, 5, 5, 2, true, 50);
-    lv_chart_set_axis_tick(ui_HourlyChart, LV_CHART_AXIS_PRIMARY_Y, 10, 5, 5, 2, true, 50);
-    lv_chart_set_axis_tick(ui_HourlyChart, LV_CHART_AXIS_SECONDARY_Y, 10, 5, 5, 2, true, 25);
+    lv_obj_set_style_radius(ui_HourlyChart, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui_HourlyChart, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_column(ui_HourlyChart, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_line_width(ui_HourlyChart, 2, LV_PART_ITEMS | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_left(ui_HourlyChart, 5, LV_PART_TICKS | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_right(ui_HourlyChart, 5, LV_PART_TICKS | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(ui_HourlyChart, 0, LV_PART_TICKS | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(ui_HourlyChart, 10, LV_PART_TICKS | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(ui_HourlyChart, lv_color_hex(0x000000), LV_PART_TICKS | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_HourlyChart, 255, LV_PART_TICKS | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_HourlyChart, &ui_font_FreeSans20, LV_PART_TICKS | LV_STATE_DEFAULT);
 
 
 

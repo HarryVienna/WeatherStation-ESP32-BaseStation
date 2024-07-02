@@ -5,8 +5,6 @@
 
 #include "esp_log.h"
 
-#include "gui.h"
-
 #include "nvs/preferences.h"
 
 #include "task/clock_task.h"
@@ -18,6 +16,9 @@
 #include "wifi/network.h"
 
 #include "config/config.h"
+#include "gui.h"
+#include "lvgl/lv_hourly_chart.h"
+#include "lvgl/lv_daily_chart.h"
 
 static const char* TAG = "GUI";
 
@@ -476,6 +477,23 @@ void disp_sen5x(float ambientTemperature, float ambientHumidity, float massConce
   {
     lv_obj_set_style_bg_color(ui_NOX, lv_color_hex(COLOR_RED), LV_PART_MAIN | LV_STATE_DEFAULT);
   }
+}
+
+void disp_weather(hourly_weather_data_t *source_data) {
+  lv_hourly_data hourly_data[NUM_HOURS];
+
+  for (int i = 0; i < NUM_HOURS; i++)
+  {
+    hourly_data[i].dt = source_data[i].time;
+    hourly_data[i].temp = (float)source_data[i].temperature_2m;
+    hourly_data[i].rain = (float)(source_data[i].rain + source_data[i].showers);
+    hourly_data[i].snow = (float)source_data[i].snowfall * 10.0f / 7.0f;  // See docu from open-meteo.com  snow -> water
+    hourly_data[i].pop = (float)source_data[i].precipitation_probability / 100.0f;
+    hourly_data[i].sun = (float)source_data[i].sunshine_duration / 3600.0f;
+  }
+
+  lv_hourly_chart_set_data(ui_HourlyChart, hourly_data);
+  lv_hourly_chart_refresh(ui_HourlyChart);
 }
 
 // -------- Setup Screen --------
