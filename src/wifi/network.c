@@ -354,6 +354,7 @@ void wifi_start() {
     setenv("TZ", tz, 1);
     tzset();
 
+    vTaskDelay(pdMS_TO_TICKS(1000 * 10)); // Wait a little bit for time sync
 }
 
 /**

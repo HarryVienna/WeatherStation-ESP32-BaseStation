@@ -51,7 +51,7 @@ void sensor_scd41_task(void *pvParameter) {
 
     for (;;) {
         // Read Measurement
-        vTaskDelay(pdMS_TO_TICKS(5000));
+        vTaskDelay(pdMS_TO_TICKS(1000 * 10));
         bool data_ready_flag = false;
         error = scd4x_get_data_ready_flag(&data_ready_flag);
         if (error) {

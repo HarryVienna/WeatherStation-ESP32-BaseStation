@@ -1995,20 +1995,26 @@ void ui_WeatherstationScreen_screen_init(void)
     lv_obj_set_style_border_color(ui_Daily, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_opa(ui_Daily, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui_Daily, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_left(ui_Daily, 30, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_right(ui_Daily, 30, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_left(ui_Daily, 38, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_right(ui_Daily, 32, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_top(ui_Daily, 15, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_bottom(ui_Daily, 35, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(ui_Daily, 38, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_DailyChart = lv_chart_create(ui_Daily);
+    ui_DailyChart = lv_daily_chart_create(ui_Daily);
     lv_obj_set_width(ui_DailyChart, lv_pct(100));
     lv_obj_set_height(ui_DailyChart, lv_pct(100));
     lv_obj_set_align(ui_DailyChart, LV_ALIGN_CENTER);
-    lv_chart_set_type(ui_DailyChart, LV_CHART_TYPE_LINE);
-    lv_chart_set_axis_tick(ui_DailyChart, LV_CHART_AXIS_PRIMARY_X, 10, 5, 5, 2, true, 50);
-    lv_chart_set_axis_tick(ui_DailyChart, LV_CHART_AXIS_PRIMARY_Y, 10, 5, 5, 2, true, 50);
-    lv_chart_set_axis_tick(ui_DailyChart, LV_CHART_AXIS_SECONDARY_Y, 10, 5, 5, 2, true, 25);
+    lv_obj_set_style_radius(ui_DailyChart, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui_DailyChart, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_column(ui_DailyChart, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_line_width(ui_DailyChart, 2, LV_PART_ITEMS | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_left(ui_DailyChart, 5, LV_PART_TICKS | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_right(ui_DailyChart, 5, LV_PART_TICKS | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(ui_DailyChart, 0, LV_PART_TICKS | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(ui_DailyChart, 10, LV_PART_TICKS | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(ui_DailyChart, lv_color_hex(0x000000), LV_PART_TICKS | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_DailyChart, 255, LV_PART_TICKS | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_DailyChart, &ui_font_FreeSans20, LV_PART_TICKS | LV_STATE_DEFAULT); 
 
 
 

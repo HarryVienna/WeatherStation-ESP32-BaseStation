@@ -32,11 +32,11 @@ extern "C" {
 // Hourly Weather data structure
 typedef struct {
     struct tm dt;
-    float temp;
-    float rain;
-    float snow;
-    float pop;
-    float sun;
+    double temp;
+    double rain;
+    double snow;
+    double pop;
+    double sun;
 } lv_hourly_data;
 
 

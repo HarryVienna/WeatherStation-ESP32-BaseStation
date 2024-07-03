@@ -10,7 +10,7 @@
 extern "C" {
 #endif
 
-#define NUM_DAYS 8
+#define NUM_DAYS 7
 #define MAX_DAILY_PRECIPITATION 20
 
 /*********************
@@ -37,7 +37,7 @@ typedef struct {
     double rain;
     double snow;
     double pop;
-    int32_t clouds;
+    double sun;
 } lv_daily_data;
 
 

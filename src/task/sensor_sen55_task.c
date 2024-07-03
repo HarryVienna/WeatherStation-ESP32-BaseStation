@@ -106,7 +106,7 @@ void sensor_sen55_task(void *pvParameter) {
 
     for (;;) {
         // Read Measurement
-        vTaskDelay(pdMS_TO_TICKS(5000));
+        vTaskDelay(pdMS_TO_TICKS(1000 * 10));
 
         uint16_t mass_concentration_pm1p0;
         uint16_t mass_concentration_pm2p5;

@@ -479,21 +479,39 @@ void disp_sen5x(float ambientTemperature, float ambientHumidity, float massConce
   }
 }
 
-void disp_weather(hourly_weather_data_t *source_data) {
+void disp_hourly_weather(hourly_weather_data_t *source_data) {
   lv_hourly_data hourly_data[NUM_HOURS];
 
   for (int i = 0; i < NUM_HOURS; i++)
   {
     hourly_data[i].dt = source_data[i].time;
-    hourly_data[i].temp = (float)source_data[i].temperature_2m;
-    hourly_data[i].rain = (float)(source_data[i].rain + source_data[i].showers);
-    hourly_data[i].snow = (float)source_data[i].snowfall * 10.0f / 7.0f;  // See docu from open-meteo.com  snow -> water
-    hourly_data[i].pop = (float)source_data[i].precipitation_probability / 100.0f;
-    hourly_data[i].sun = (float)source_data[i].sunshine_duration / 3600.0f;
+    hourly_data[i].temp = source_data[i].temperature_2m;
+    hourly_data[i].rain = source_data[i].rain + source_data[i].showers;
+    hourly_data[i].snow = source_data[i].snowfall * 10.0f / 7.0f;  // See docu from open-meteo.com  snow -> water
+    hourly_data[i].pop = source_data[i].precipitation_probability / 100.0f;
+    hourly_data[i].sun = source_data[i].sunshine_duration / 3600.0f;
   }
 
   lv_hourly_chart_set_data(ui_HourlyChart, hourly_data);
   lv_hourly_chart_refresh(ui_HourlyChart);
+}
+
+void disp_daily_weather(daily_weather_data_t *source_data) {
+  lv_daily_data daily_data[NUM_DAYS];
+
+  for (int i = 0; i < NUM_DAYS; i++)
+  {
+    daily_data[i].dt = source_data[i].time;
+    daily_data[i].low_temp = source_data[i].temperature_2m_min;
+    daily_data[i].high_temp = source_data[i].temperature_2m_max;
+    daily_data[i].rain = source_data[i].rain_sum + source_data[i].showers_sum;
+    daily_data[i].snow = source_data[i].snowfall_sum * 10.0f / 7.0f;  // See docu from open-meteo.com  snow -> water
+    daily_data[i].pop = source_data[i].precipitation_probability_max / 100.0f;
+    daily_data[i].sun = source_data[i].sunshine_duration / source_data[i].daylight_duration;
+  }
+
+  lv_daily_chart_set_data(ui_DailyChart, daily_data);
+  lv_daily_chart_refresh(ui_DailyChart);
 }
 
 // -------- Setup Screen --------

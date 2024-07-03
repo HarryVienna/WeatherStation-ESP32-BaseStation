@@ -410,7 +410,7 @@ static void draw_daily_clouds(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
         col_area.x2 = p2.x;
         col_area.y2 = p2.y;
 
-        col_dsc.bg_opa = (100 - chart->data_array[i].clouds) * 255 / 100; // We display sun, not clouds. Sun is 100 - clouds
+        col_dsc.bg_opa = chart->data_array[i].sun * 255;
 
         part_draw_dsc.draw_area = &col_area;
         part_draw_dsc.rect_dsc = &col_dsc;
