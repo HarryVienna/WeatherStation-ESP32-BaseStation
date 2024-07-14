@@ -19,7 +19,8 @@
 #include "cJSON.h"
 
 static const char *WEATHER_URL_BASE = "https://api.open-meteo.com/v1/forecast";
-static const char *WEATHER_URL_HOURLY = "https://api.open-meteo.com/v1/forecast?latitude=48.2167&longitude=16.3&hourly=temperature_2m,precipitation_probability,rain,showers,snowfall,wind_speed_10m,wind_gusts_10m,sunshine_duration&timeformat=unixtime&timezone=auto&forecast_days=3";
+static const char *WEATHER_URL_CURRENT = "https://api.open-meteo.com/v1/forecast?latitude=48.2144&longitude=16.3234&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,weather_code,cloud_cover,wind_speed_10m,wind_direction_10m,wind_gusts_10m,uv_index&timeformat=unixtime&timezone=auto";
+static const char *WEATHER_URL_HOURLY = "https://api.open-meteo.com/v1/forecast?latitude=48.2167&longitude=16.3&hourly=temperature_2m,precipitation_probability,rain,showers,snowfall,wind_speed_10m,wind_gusts_10m,sunshine_duration,cloud_cover,is_day&timeformat=unixtime&timezone=auto&forecast_days=3";
 static const char *WEATHER_URL_DAILY  = "https://api.open-meteo.com/v1/forecast?latitude=48.2167&longitude=16.3&daily=temperature_2m_max,temperature_2m_min,daylight_duration,sunshine_duration,rain_sum,showers_sum,snowfall_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max&timeformat=unixtime&timezone=auto";
 
 static const char* TAG = "weather_task";
@@ -91,6 +92,7 @@ void weather_task(void *pvParameter) {
 
     esp_err_t err;
 
+    current_weather_data_t current_data;
     hourly_weather_data_t hourly_data[48];
     daily_weather_data_t daily_data[7];
     
@@ -107,7 +109,61 @@ void weather_task(void *pvParameter) {
     esp_http_client_handle_t client = esp_http_client_init(&config);
 
     for (;;) {
-        
+        // ------- Hourly data -------
+        ESP_LOGI(TAG, "Call current weather API ");
+
+        esp_http_client_set_url(client, WEATHER_URL_CURRENT);
+
+        err = esp_http_client_perform(client);
+        if (err == ESP_OK) {
+            ESP_LOGI(TAG, "HTTP GET Status = %d, content_length = %"PRId64,
+                    esp_http_client_get_status_code(client),
+                    esp_http_client_get_content_length(client));
+            //ESP_LOGI(TAG, "JSON %s", response.buffer);
+
+            // Parse JSON response
+            cJSON *json = cJSON_Parse(response.buffer);
+            if (json == NULL) {
+                const char *error_ptr = cJSON_GetErrorPtr();
+                if (error_ptr != NULL) {
+                    ESP_LOGE(TAG, "Error before: %s", error_ptr);
+                }
+            }
+            else {
+                cJSON *current = cJSON_GetObjectItem(json, "current");
+
+                current_data.temperature_2m = cJSON_GetObjectItem(current, "temperature_2m")->valuedouble;
+                current_data.relative_humidity_2m = cJSON_GetObjectItem(current, "relative_humidity_2m")->valueint;
+                current_data.apparent_temperature = cJSON_GetObjectItem(current, "apparent_temperature")->valuedouble;
+                current_data.is_day = cJSON_GetObjectItem(current, "is_day")->valueint;
+                current_data.weather_code = cJSON_GetObjectItem(current, "weather_code")->valueint;
+                current_data.cloud_cover = cJSON_GetObjectItem(current, "cloud_cover")->valueint;
+                current_data.wind_speed_10m = cJSON_GetObjectItem(current, "wind_speed_10m")->valuedouble;
+                current_data.wind_direction_10m = cJSON_GetObjectItem(current, "wind_direction_10m")->valueint;
+                current_data.wind_gusts_10m = cJSON_GetObjectItem(current, "wind_gusts_10m")->valuedouble;
+                current_data.uv_index = cJSON_GetObjectItem(current, "uv_index")->valuedouble;
+
+                xSemaphoreTakeRecursive(lvgl_mux, portMAX_DELAY);
+                disp_current_weather(&current_data);
+                xSemaphoreGiveRecursive(lvgl_mux);                
+            }
+            
+            cJSON_Delete(json);
+            
+            // Clean up
+            if (response.buffer) {
+                heap_caps_free(response.buffer);
+                response.buffer = NULL;  // Reset the buffer pointer
+                response.buffer_len = 0; // Reset the buffer length
+            }
+
+        } else {
+            ESP_LOGE(TAG, "HTTP GET request failed: %s", esp_err_to_name(err));
+        }
+
+        esp_http_client_close(client);
+
+
         // ------- Hourly data -------
         ESP_LOGI(TAG, "Call hourly weather API ");
 
@@ -147,6 +203,8 @@ void weather_task(void *pvParameter) {
                 cJSON *wind_speed_10m = cJSON_GetObjectItem(hourly, "wind_speed_10m");
                 cJSON *wind_gusts_10m = cJSON_GetObjectItem(hourly, "wind_gusts_10m");
                 cJSON *sunshine_duration = cJSON_GetObjectItem(hourly, "sunshine_duration");
+                cJSON *cloud_cover = cJSON_GetObjectItem(hourly, "cloud_cover");
+                cJSON *is_day = cJSON_GetObjectItem(hourly, "is_day");
 
                 // Iterate through the "hourly" data array
                 for (int i = 0; i < 48; i++) {
@@ -161,6 +219,8 @@ void weather_task(void *pvParameter) {
                     hourly_data[i].wind_speed_10m = cJSON_GetArrayItem(wind_speed_10m, i + currentHour)->valuedouble;
                     hourly_data[i].wind_gusts_10m = cJSON_GetArrayItem(wind_gusts_10m, i + currentHour)->valuedouble;
                     hourly_data[i].sunshine_duration = cJSON_GetArrayItem(sunshine_duration, i + currentHour)->valuedouble;
+                    hourly_data[i].cloud_cover = cJSON_GetArrayItem(cloud_cover, i + currentHour)->valuedouble;
+                    hourly_data[i].is_day = cJSON_GetArrayItem(is_day, i + currentHour)->valueint;
                 }
 
                 xSemaphoreTakeRecursive(lvgl_mux, portMAX_DELAY);

@@ -28,6 +28,7 @@
 static const char* TAG = "WIFI";
 
 extern SemaphoreHandle_t lvgl_mux;
+static SemaphoreHandle_t sync_semaphore;
 
 typedef struct struct_data {
     uint8_t msg_type;
@@ -327,12 +328,21 @@ bool wifi_connect(const char* ssid, const char* password, bool retry_forever) {
 }
 
 /**
+ * @brief Callback function from time sync
+ *
+ */
+void sync_callback(struct timeval *tv) {
+  ESP_LOGI(TAG, "Syncing date/time: %s", ctime(&tv->tv_sec));
+  xSemaphoreGive(sync_semaphore);
+}
+
+
+/**
  * @brief     Start WiFi connection and setup time synchronization
  *
  * @details   Initializes WiFi connection using stored credentials.
  *            Connects to the specified SSID using the provided password.
  *            Configures time synchronization based on the given timezone and NTP server.
- *            Prints the connected WiFi details to the Serial monitor.
  */
 void wifi_start() {
 
@@ -347,14 +357,23 @@ void wifi_start() {
 
     wifi_connect(ssid, password, true);
 
+    // Create and take the semaphore
+    sync_semaphore = xSemaphoreCreateBinary();
+
     esp_sntp_setoperatingmode(SNTP_OPMODE_POLL);
     esp_sntp_setservername(0, NTP_SERVER);
+    sntp_set_time_sync_notification_cb(&sync_callback);
     esp_sntp_init();
 
     setenv("TZ", tz, 1);
     tzset();
 
-    vTaskDelay(pdMS_TO_TICKS(1000 * 10)); // Wait a little bit for time sync
+    // Wait for the sync_callback to give the semaphore
+    if (xSemaphoreTake(sync_semaphore, portMAX_DELAY) == pdTRUE) {
+        ESP_LOGI(TAG, "Time synchronization successful");
+    } else {
+        ESP_LOGW(TAG, "Time synchronization timeout");
+    }
 }
 
 /**

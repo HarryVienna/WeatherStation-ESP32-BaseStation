@@ -13,6 +13,8 @@
 #include "task/sensor_scd41_task.h"
 #include "task/sensor_sen55_task.h"
 #include "task/weather_task.h"
+#include "task/brightness_task.h"
+
 #include "wifi/network.h"
 
 #include "config/config.h"
@@ -479,6 +481,33 @@ void disp_sen5x(float ambientTemperature, float ambientHumidity, float massConce
   }
 }
 
+void disp_current_weather(current_weather_data_t *source_data) {
+
+  char temp[8];
+  char clouds[8];
+  char uv_index[8];
+  char wind_speed[8];
+  char wind_gust[8];
+
+  sprintf(temp, "%.1f", source_data->temperature_2m);
+  lv_label_set_text(ui_TempCurrent, temp);
+
+  sprintf(clouds, "%d", source_data->cloud_cover);
+  lv_label_set_text(ui_CloudsCurrent, clouds);
+
+  sprintf(uv_index, "%d", (int) round(source_data->uv_index));
+  lv_label_set_text(ui_UvCurrent, uv_index);
+
+  sprintf(wind_speed, "%.1f", source_data->wind_speed_10m);
+  lv_label_set_text(ui_WindSpeedCurrent, wind_speed);
+
+  sprintf(wind_gust, "%.1f", source_data->wind_gusts_10m);
+  lv_label_set_text(ui_WindGustCurrent, wind_gust);
+
+  lv_img_set_angle(ui_WindDirectionCurrentIcon, source_data->wind_direction_10m * 10);
+
+}
+
 void disp_hourly_weather(hourly_weather_data_t *source_data) {
   lv_hourly_data hourly_data[NUM_HOURS];
 
@@ -489,7 +518,8 @@ void disp_hourly_weather(hourly_weather_data_t *source_data) {
     hourly_data[i].rain = source_data[i].rain + source_data[i].showers;
     hourly_data[i].snow = source_data[i].snowfall * 10.0f / 7.0f;  // See docu from open-meteo.com  snow -> water
     hourly_data[i].pop = source_data[i].precipitation_probability / 100.0f;
-    hourly_data[i].sun = source_data[i].sunshine_duration / 3600.0f;
+    //hourly_data[i].sun = source_data[i].sunshine_duration / 3600.0f;
+    hourly_data[i].sun = source_data[i].is_day ? (100.0f - source_data[i].cloud_cover) / 100.0f : 0;
   }
 
   lv_hourly_chart_set_data(ui_HourlyChart, hourly_data);
@@ -620,16 +650,16 @@ void start_tasks()
       NULL,           
       1,       
       NULL,       
-      1);      
+      1);
 
-  // xTaskCreatePinnedToCore(
-  //     brightness_task,
-  //     "Brightness Task",
-  //     4096,
-  //     NULL,
-  //     1,
-  //     NULL,
-  //     1);
+  xTaskCreatePinnedToCore(
+      brightness_task,
+      "Brightness Task",
+      4096,
+      NULL,
+      1,
+      NULL,
+      1);
 
   xTaskCreatePinnedToCore(
       weather_task,
