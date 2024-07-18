@@ -634,23 +634,23 @@ void start_tasks()
       NULL,         /* Task handle. */
       1);           /* Clock task on core 0*/
 
-  xTaskCreatePinnedToCore(
-      sensor_sen55_task,    
-      "Sensor SEN55 Task",  
-      4096,          
-      NULL,           
-      1,       
-      NULL,       
-      1);
+  // xTaskCreatePinnedToCore(
+  //     sensor_sen55_task,    
+  //     "Sensor SEN55 Task",  
+  //     4096,          
+  //     NULL,           
+  //     1,       
+  //     NULL,       
+  //     1);
 
-  xTaskCreatePinnedToCore(
-      sensor_scd41_task,    
-      "Sensor SCD41 Task",  
-      4096,          
-      NULL,           
-      1,       
-      NULL,       
-      1);
+  // xTaskCreatePinnedToCore(
+  //     sensor_scd41_task,    
+  //     "Sensor SCD41 Task",  
+  //     4096,          
+  //     NULL,           
+  //     1,       
+  //     NULL,       
+  //     1);
 
   xTaskCreatePinnedToCore(
       brightness_task,
@@ -661,14 +661,14 @@ void start_tasks()
       NULL,
       1);
 
-  xTaskCreatePinnedToCore(
-      weather_task,
-      "Weather Task",
-      16384,
-      NULL,
-      1,
-      NULL,
-      1);
+  // xTaskCreatePinnedToCore(
+  //     weather_task,
+  //     "Weather Task",
+  //     16384,
+  //     NULL,
+  //     1,
+  //     NULL,
+  //     1);
 }
 
 // -------- LVGL Events --------

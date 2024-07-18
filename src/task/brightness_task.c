@@ -10,6 +10,8 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
+#include "dfrobot_c4001.h"
+
 #include "brightness_task.h"
 
 #include "config/config.h"
@@ -33,6 +35,45 @@ static const char* TAG = "brightness_task";
 void brightness_task(void *pvParameter){
 
   ESP_LOGI(TAG, "Start Brighness task");
+
+
+  DFRobot_C4001_t sensor;
+  dfrobot_c4001_init(&sensor, I2C_NUM, C4001_ADDR_0);
+
+  // Set sensor mode
+  //dfrobot_c4001_set_sensormode(&sensor, eResetSen);
+  //dfrobot_c4001_set_sensormode(&sensor, eStartSen);
+  dfrobot_c4001_set_sensormode(&sensor, eSpeedMode);
+
+  sSensorStatus_t data;
+  data = dfrobot_c4001_get_status(&sensor);
+  
+  //  0 stop  1 start
+  ESP_LOGI(TAG, "work status  = %d", data.workStatus);
+
+  //  0 is exist   1 speed
+  ESP_LOGI(TAG, "work mode  = %d", data.workMode);
+
+  //  0 no init    1 init success
+  ESP_LOGI(TAG, "init status  = %d", data.initStatus);
+
+  if (dfrobot_c4001_set_detect_thres(&sensor, /*min*/ 11, /*max*/ 1200, /*thres*/ 10 )) {
+    ESP_LOGI(TAG, "set detect threshold successfully");
+  }
+
+  // set Fretting Detection
+  dfrobot_c4001_set_fretting_detection(&sensor, eON);
+
+  ESP_LOGI(TAG, "min range = %d", dfrobot_c4001_get_tmin_range(&sensor));
+  ESP_LOGI(TAG, "max range = %d", dfrobot_c4001_get_tmax_range(&sensor));
+  ESP_LOGI(TAG, "threshold range = %d", dfrobot_c4001_get_thres_range(&sensor));
+  ESP_LOGI(TAG, "fretting detection = %d", dfrobot_c4001_get_fretting_detection(&sensor));
+
+  for (;;) {
+    ESP_LOGI(TAG, "target number = %d", dfrobot_c4001_get_target_number(&sensor));
+    vTaskDelay(pdMS_TO_TICKS(1000)); // Sleep for 1 second
+  }
+
 
   static int adc_raw;
 
