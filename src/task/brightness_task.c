@@ -62,12 +62,12 @@ void brightness_task(void *pvParameter){
   //   ESP_LOGI(TAG, "set detect threshold successfully");
   // }
 
-  // if(dfrobot_c4001_set_detect_range(&sensor, /*min*/30, /*max*/1000, /*trig*/1000)){
-  //   ESP_LOGI(TAG, "set detection range successfully");
-  // }
+  if(dfrobot_c4001_set_detect_range(&sensor, /*min*/30, /*max*/1000, /*trig*/1000)){
+    ESP_LOGI(TAG, "set detection range successfully");
+  }
 
   // set trigger sensitivity 0 - 9
-  if(dfrobot_c4001_set_trig_sensitivity(&sensor, 2)){
+  if(dfrobot_c4001_set_trig_sensitivity(&sensor, 9)){
     ESP_LOGI(TAG, "set trig sensitivity successfully");
   }
 
