@@ -40,10 +40,11 @@ void brightness_task(void *pvParameter){
   DFRobot_C4001_t sensor;
   dfrobot_c4001_init(&sensor, I2C_NUM, C4001_ADDR_0);
 
+  dfrobot_c4001_set_sensor(&sensor, eRecoverSen);
+  vTaskDelay(pdMS_TO_TICKS(1500));
+
   // Set sensor mode
-  //dfrobot_c4001_set_sensormode(&sensor, eResetSen);
-  //dfrobot_c4001_set_sensormode(&sensor, eStartSen);
-  dfrobot_c4001_set_sensormode(&sensor, eSpeedMode);
+  dfrobot_c4001_set_sensormode(&sensor, eExistMode);
 
   sSensorStatus_t data;
   data = dfrobot_c4001_get_status(&sensor);
@@ -57,20 +58,45 @@ void brightness_task(void *pvParameter){
   //  0 no init    1 init success
   ESP_LOGI(TAG, "init status  = %d", data.initStatus);
 
-  if (dfrobot_c4001_set_detect_thres(&sensor, /*min*/ 11, /*max*/ 1200, /*thres*/ 10 )) {
-    ESP_LOGI(TAG, "set detect threshold successfully");
+  // if (dfrobot_c4001_set_detect_thres(&sensor, /*min*/ 10, /*max*/ 1000, /*thres*/ 10 )) {
+  //   ESP_LOGI(TAG, "set detect threshold successfully");
+  // }
+
+  // if(dfrobot_c4001_set_detect_range(&sensor, /*min*/30, /*max*/1000, /*trig*/1000)){
+  //   ESP_LOGI(TAG, "set detection range successfully");
+  // }
+
+  // set trigger sensitivity 0 - 9
+  if(dfrobot_c4001_set_trig_sensitivity(&sensor, 2)){
+    ESP_LOGI(TAG, "set trig sensitivity successfully");
+  }
+
+  // set keep sensitivity 0 - 9
+  if(dfrobot_c4001_set_keep_sensitivity(&sensor, 2)){
+    ESP_LOGI(TAG, "set keep sensitivity successfully");
   }
 
   // set Fretting Detection
-  dfrobot_c4001_set_fretting_detection(&sensor, eON);
+  // dfrobot_c4001_set_fretting_detection(&sensor, eON);
 
-  ESP_LOGI(TAG, "min range = %d", dfrobot_c4001_get_tmin_range(&sensor));
-  ESP_LOGI(TAG, "max range = %d", dfrobot_c4001_get_tmax_range(&sensor));
+  ESP_LOGI(TAG, "speed min range = %d", dfrobot_c4001_get_tmin_range(&sensor));
+  ESP_LOGI(TAG, "speed max range = %d", dfrobot_c4001_get_tmax_range(&sensor));
   ESP_LOGI(TAG, "threshold range = %d", dfrobot_c4001_get_thres_range(&sensor));
+  
+  ESP_LOGI(TAG, "min range = %d", dfrobot_c4001_get_min_range(&sensor));
+  ESP_LOGI(TAG, "max range = %d", dfrobot_c4001_get_max_range(&sensor));
+  ESP_LOGI(TAG, "trigger range = %d", dfrobot_c4001_get_trig_range(&sensor));
+
+  ESP_LOGI(TAG, "trigger sensitivity = %d", dfrobot_c4001_get_trig_sensitivity(&sensor));
+  ESP_LOGI(TAG, "keep sensitivity = %d", dfrobot_c4001_get_keep_sensitivity(&sensor));
+  
   ESP_LOGI(TAG, "fretting detection = %d", dfrobot_c4001_get_fretting_detection(&sensor));
 
   for (;;) {
-    ESP_LOGI(TAG, "target number = %d", dfrobot_c4001_get_target_number(&sensor));
+    //ESP_LOGI(TAG, "target number = %d", dfrobot_c4001_get_target_number(&sensor));
+    if (dfrobot_c4001_motion_detection(&sensor)) {
+      ESP_LOGI(TAG, "motion");
+    }
     vTaskDelay(pdMS_TO_TICKS(1000)); // Sleep for 1 second
   }
 
