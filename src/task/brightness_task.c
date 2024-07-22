@@ -11,6 +11,7 @@
 #include "freertos/task.h"
 
 #include "dfrobot_c4001.h"
+#include "bh1750.h"
 
 #include "brightness_task.h"
 
@@ -36,6 +37,23 @@ void brightness_task(void *pvParameter){
 
   ESP_LOGI(TAG, "Start Brighness task");
 
+
+
+  bh_1750_t lux_sensor;
+  bh1750_init(&lux_sensor, I2C_NUM, BH1750_ADDR_0);
+
+  bh1750_power_on(&lux_sensor);
+  bh1750_set_measure_time(&lux_sensor, 254);
+  bh1750_send_opcode(&lux_sensor, CONT_HIGH_MODE);
+
+  uint16_t lux;
+  for (;;) {
+    bh1750_read(&lux_sensor, &lux);
+
+    vTaskDelay(pdMS_TO_TICKS(200));
+    ESP_LOGI(TAG, "lux  = %d", lux);
+
+  }
 
   DFRobot_C4001_t sensor;
   dfrobot_c4001_init(&sensor, I2C_NUM, C4001_ADDR_0);
@@ -99,6 +117,10 @@ void brightness_task(void *pvParameter){
     }
     vTaskDelay(pdMS_TO_TICKS(1000)); // Sleep for 1 second
   }
+
+
+
+
 
 
   static int adc_raw;

@@ -4,6 +4,10 @@
 #define C4001_ADDR_0 0x2A
 #define C4001_ADDR_1 0x2B
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 #include <stdbool.h>
 #include <driver/i2c.h>
@@ -294,4 +298,8 @@ float dfrobot_c4001_get_target_range(DFRobot_C4001_t *sensor);
  */
 uint32_t dfrobot_c4001_get_target_energy(DFRobot_C4001_t *sensor);
 
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* __DFROBOT_C4001_H__ */

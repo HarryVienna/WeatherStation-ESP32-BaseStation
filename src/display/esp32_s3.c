@@ -78,7 +78,7 @@ void init_backlight(void) {
     ledc_timer_config(&ledc_timer);
     ledc_channel_config(&ledc_channel);
 
-    set_backlight_brightness(128);
+    set_backlight_brightness(16);
 }
 
 /**

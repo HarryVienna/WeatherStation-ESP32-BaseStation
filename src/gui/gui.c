@@ -518,8 +518,8 @@ void disp_hourly_weather(hourly_weather_data_t *source_data) {
     hourly_data[i].rain = source_data[i].rain + source_data[i].showers;
     hourly_data[i].snow = source_data[i].snowfall * 10.0f / 7.0f;  // See docu from open-meteo.com  snow -> water
     hourly_data[i].pop = source_data[i].precipitation_probability / 100.0f;
-    //hourly_data[i].sun = source_data[i].sunshine_duration / 3600.0f;
-    hourly_data[i].sun = source_data[i].is_day ? (100.0f - source_data[i].cloud_cover) / 100.0f : 0;
+    hourly_data[i].sun = source_data[i].sunshine_duration / 3600.0f;
+    //hourly_data[i].sun = source_data[i].is_day ? (100.0f - source_data[i].cloud_cover) / 100.0f : 0;
   }
 
   lv_hourly_chart_set_data(ui_HourlyChart, hourly_data);
@@ -634,23 +634,23 @@ void start_tasks()
       NULL,         /* Task handle. */
       1);           /* Clock task on core 0*/
 
-  // xTaskCreatePinnedToCore(
-  //     sensor_sen55_task,    
-  //     "Sensor SEN55 Task",  
-  //     4096,          
-  //     NULL,           
-  //     1,       
-  //     NULL,       
-  //     1);
+  xTaskCreatePinnedToCore(
+      sensor_sen55_task,    
+      "Sensor SEN55 Task",  
+      4096,          
+      NULL,           
+      1,       
+      NULL,       
+      1);
 
-  // xTaskCreatePinnedToCore(
-  //     sensor_scd41_task,    
-  //     "Sensor SCD41 Task",  
-  //     4096,          
-  //     NULL,           
-  //     1,       
-  //     NULL,       
-  //     1);
+  xTaskCreatePinnedToCore(
+      sensor_scd41_task,    
+      "Sensor SCD41 Task",  
+      4096,          
+      NULL,           
+      1,       
+      NULL,       
+      1);
 
   xTaskCreatePinnedToCore(
       brightness_task,
@@ -661,14 +661,14 @@ void start_tasks()
       NULL,
       1);
 
-  // xTaskCreatePinnedToCore(
-  //     weather_task,
-  //     "Weather Task",
-  //     16384,
-  //     NULL,
-  //     1,
-  //     NULL,
-  //     1);
+  xTaskCreatePinnedToCore(
+      weather_task,
+      "Weather Task",
+      16384,
+      NULL,
+      1,
+      NULL,
+      1);
 }
 
 // -------- LVGL Events --------
