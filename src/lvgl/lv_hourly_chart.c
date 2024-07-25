@@ -268,7 +268,7 @@ static void draw_hourly_x_ticks(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
     lv_draw_line_dsc_t line_dsc;
     lv_draw_line_dsc_init(&line_dsc);
     lv_obj_init_draw_line_dsc(obj, LV_PART_ITEMS, &line_dsc);
-    line_dsc.color = lv_color_hex(0x00000);
+    line_dsc.color = lv_color_hex(COLOR_BLACK);
     line_dsc.opa = LV_OPA_50;
     line_dsc.width = 2;
 
@@ -355,7 +355,7 @@ static void draw_hourly_div_lines(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
     lv_draw_line_dsc_t line_dsc;
     lv_draw_line_dsc_init(&line_dsc);
     lv_obj_init_draw_line_dsc(obj, LV_PART_ITEMS, &line_dsc);
-    line_dsc.color = lv_color_hex(0x00000);
+    line_dsc.color = lv_color_hex(COLOR_BLACK);
     line_dsc.opa = LV_OPA_50;
     line_dsc.width = 2;
     
@@ -494,7 +494,7 @@ static void draw_hourly_temp(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
     line_dsc.round_start = 1;
     line_dsc.round_end = 1;
     line_dsc.raw_end = 0;
-    line_dsc.color = lv_color_hex(0xF56101);
+    line_dsc.color = lv_color_hex(COLOR_ORANGE);
 
     lv_obj_draw_part_dsc_t part_draw_dsc;
     lv_obj_draw_dsc_init(&part_draw_dsc, draw_ctx);
@@ -607,10 +607,10 @@ static void draw_hourly_precipitation(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
             part_draw_dsc.rect_dsc = &col_dsc;
 
             lv_event_send(obj, LV_EVENT_DRAW_PART_BEGIN, &part_draw_dsc);
-            col_dsc.bg_color = lv_color_hex(0xffffff);
+            col_dsc.bg_color = lv_color_hex(COLOR_WHITE);
             col_dsc.bg_opa = LV_OPA_100;
             lv_draw_rect(draw_ctx, &col_dsc, &col_area);
-            col_dsc.bg_color = lv_color_hex(0x96C6F5);
+            col_dsc.bg_color = lv_color_hex(COLOR_BLUE);
             col_dsc.bg_opa = chart->data_array[i].pop * 255;
             lv_draw_rect(draw_ctx, &col_dsc, &col_area);
             lv_event_send(obj, LV_EVENT_DRAW_PART_END, &part_draw_dsc);
@@ -631,10 +631,10 @@ static void draw_hourly_precipitation(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
             part_draw_dsc.rect_dsc = &col_dsc;
 
             lv_event_send(obj, LV_EVENT_DRAW_PART_BEGIN, &part_draw_dsc);
-            col_dsc.bg_color = lv_color_hex(0xffffff);
+            col_dsc.bg_color = lv_color_hex(COLOR_WHITE);
             col_dsc.bg_opa = LV_OPA_100;
             lv_draw_rect(draw_ctx, &col_dsc, &col_area);
-            col_dsc.bg_color = lv_color_hex(0xEB8DFA);
+            col_dsc.bg_color = lv_color_hex(COLOR_PINK);
             col_dsc.bg_opa = chart->data_array[i].pop * 255;
             lv_draw_rect(draw_ctx, &col_dsc, &col_area);
             lv_event_send(obj, LV_EVENT_DRAW_PART_END, &part_draw_dsc);

@@ -10,7 +10,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-#include "dfrobot_c4001.h"
+#include "sen0610.h"
 #include "bh1750.h"
 
 #include "brightness_task.h"
@@ -38,7 +38,7 @@ void brightness_task(void *pvParameter){
   ESP_LOGI(TAG, "Start Brighness task");
 
 
-
+/*
   bh_1750_t lux_sensor;
   bh1750_init(&lux_sensor, I2C_NUM, BH1750_ADDR_0);
 
@@ -55,68 +55,112 @@ void brightness_task(void *pvParameter){
 
   }
 
-  DFRobot_C4001_t sensor;
-  dfrobot_c4001_init(&sensor, I2C_NUM, C4001_ADDR_0);
+*/
 
-  dfrobot_c4001_set_sensor(&sensor, eRecoverSen);
+
+  sen0610_t sensor;
+  sen0610_init(&sensor, I2C_NUM, C4001_ADDR_0);
+
+  sen0610_set_sensor(&sensor, RECOVER_SEN);
   vTaskDelay(pdMS_TO_TICKS(1500));
 
-  // Set sensor mode
-  dfrobot_c4001_set_sensormode(&sensor, eExistMode);
+  uint32_t soft_version = sen0610_get_soft_version(&sensor);
+  ESP_LOGI(TAG, "Software version  = %lu", soft_version);
 
-  sSensorStatus_t data;
-  data = dfrobot_c4001_get_status(&sensor);
+
+
+  // Set sensor mode
+  sen0610_set_mode(&sensor, PRESENCE_MODE);
+
+  sensor_status_t data;
+  data = sen0610_get_status(&sensor);
   
   //  0 stop  1 start
-  ESP_LOGI(TAG, "work status  = %d", data.workStatus);
+  ESP_LOGI(TAG, "work status  = %d", data.work_status);
 
-  //  0 is exist   1 speed
-  ESP_LOGI(TAG, "work mode  = %d", data.workMode);
+  //  0 is presence   1 speed
+  ESP_LOGI(TAG, "work mode  = %d", data.work_mode);
 
   //  0 no init    1 init success
-  ESP_LOGI(TAG, "init status  = %d", data.initStatus);
+  ESP_LOGI(TAG, "init status  = %d", data.init_status);
 
-  // if (dfrobot_c4001_set_detect_thres(&sensor, /*min*/ 10, /*max*/ 1000, /*thres*/ 10 )) {
-  //   ESP_LOGI(TAG, "set detect threshold successfully");
-  // }
 
-  if(dfrobot_c4001_set_detect_range(&sensor, /*min*/30, /*max*/1000, /*trig*/1000)){
+  if(sen0610_set_detect_range(&sensor, /*min*/30, /*max*/400, /*trig*/300)){
     ESP_LOGI(TAG, "set detection range successfully");
   }
 
   // set trigger sensitivity 0 - 9
-  if(dfrobot_c4001_set_trig_sensitivity(&sensor, 9)){
+  if(sen0610_set_trig_sensitivity(&sensor, 2)){
     ESP_LOGI(TAG, "set trig sensitivity successfully");
   }
 
   // set keep sensitivity 0 - 9
-  if(dfrobot_c4001_set_keep_sensitivity(&sensor, 2)){
+  if(sen0610_set_keep_sensitivity(&sensor, 2)){
     ESP_LOGI(TAG, "set keep sensitivity successfully");
   }
 
-  // set Fretting Detection
-  // dfrobot_c4001_set_fretting_detection(&sensor, eON);
+  ESP_LOGI(TAG, "min range = %d", sen0610_get_min_range(&sensor));
+  ESP_LOGI(TAG, "max range = %d", sen0610_get_max_range(&sensor));
+  ESP_LOGI(TAG, "trigger range = %d", sen0610_get_trig_range(&sensor));
 
-  ESP_LOGI(TAG, "speed min range = %d", dfrobot_c4001_get_tmin_range(&sensor));
-  ESP_LOGI(TAG, "speed max range = %d", dfrobot_c4001_get_tmax_range(&sensor));
-  ESP_LOGI(TAG, "threshold range = %d", dfrobot_c4001_get_thres_range(&sensor));
-  
-  ESP_LOGI(TAG, "min range = %d", dfrobot_c4001_get_min_range(&sensor));
-  ESP_LOGI(TAG, "max range = %d", dfrobot_c4001_get_max_range(&sensor));
-  ESP_LOGI(TAG, "trigger range = %d", dfrobot_c4001_get_trig_range(&sensor));
+  ESP_LOGI(TAG, "trigger sensitivity = %d", sen0610_get_trig_sensitivity(&sensor));
+  ESP_LOGI(TAG, "keep sensitivity = %d", sen0610_get_keep_sensitivity(&sensor));
 
-  ESP_LOGI(TAG, "trigger sensitivity = %d", dfrobot_c4001_get_trig_sensitivity(&sensor));
-  ESP_LOGI(TAG, "keep sensitivity = %d", dfrobot_c4001_get_keep_sensitivity(&sensor));
-  
-  ESP_LOGI(TAG, "fretting detection = %d", dfrobot_c4001_get_fretting_detection(&sensor));
-
+  presence_data_t presence_data;
   for (;;) {
-    //ESP_LOGI(TAG, "target number = %d", dfrobot_c4001_get_target_number(&sensor));
-    if (dfrobot_c4001_motion_detection(&sensor)) {
-      ESP_LOGI(TAG, "motion");
-    }
-    vTaskDelay(pdMS_TO_TICKS(1000)); // Sleep for 1 second
+    sen0610_get_presence_status(&sensor, &presence_data);
+
+    ESP_LOGI(TAG, "Presence %d   Distance %d", presence_data.presence, presence_data.range);
+
+    vTaskDelay(pdMS_TO_TICKS(250)); // Sleep for 1 second
   }
+
+
+
+
+  // Set sensor mode
+  sen0610_set_mode(&sensor, SPEED_MODE);
+
+  ESP_LOGI(TAG, "speed min range = %d", sen0610_get_tmin_range(&sensor));
+  ESP_LOGI(TAG, "speed max range = %d", sen0610_get_tmax_range(&sensor));
+  ESP_LOGI(TAG, "threshold range = %d", sen0610_get_thres_range(&sensor));
+
+  //sensor_status_t data;
+  data = sen0610_get_status(&sensor);
+  
+  //  0 stop  1 start
+  ESP_LOGI(TAG, "work status  = %d", data.work_status);
+
+  //  0 is presence   1 speed
+  ESP_LOGI(TAG, "work mode  = %d", data.work_mode);
+
+  //  0 no init    1 init success
+  ESP_LOGI(TAG, "init status  = %d", data.init_status);
+
+  if (sen0610_set_detect_thres(&sensor, /*min*/ 30, /*max*/ 1000, /*thres*/ 400 )) {
+    ESP_LOGI(TAG, "set detect threshold successfully");
+  }
+
+  // set Fretting Detection
+  sen0610_set_micro_detection(&sensor, MICRO_OFF);
+
+  
+  ESP_LOGI(TAG, "speed min range = %d", sen0610_get_tmin_range(&sensor));
+  ESP_LOGI(TAG, "speed max range = %d", sen0610_get_tmax_range(&sensor));
+  ESP_LOGI(TAG, "threshold range = %d", sen0610_get_thres_range(&sensor));
+  
+  ESP_LOGI(TAG, "micro detection = %d", sen0610_get_micro_detection(&sensor));
+
+  speed_data_t speed_data;
+  for (;;) {
+    sen0610_get_speed_status(&sensor, &speed_data);
+
+    ESP_LOGI(TAG, "Number %d    Speed %d     Distance %d     Energy %d", speed_data.number, speed_data.speed, speed_data.range, speed_data.energy);
+
+    vTaskDelay(pdMS_TO_TICKS(100)); // Sleep for 1 second
+  }
+
+
 
 
 

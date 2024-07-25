@@ -517,7 +517,7 @@ void disp_hourly_weather(hourly_weather_data_t *source_data) {
     hourly_data[i].temp = source_data[i].temperature_2m;
     hourly_data[i].rain = source_data[i].rain + source_data[i].showers;
     hourly_data[i].snow = source_data[i].snowfall * 10.0f / 7.0f;  // See docu from open-meteo.com  snow -> water
-    hourly_data[i].pop = source_data[i].precipitation_probability / 100.0f;
+    hourly_data[i].pop = (source_data[i].precipitation_probability * 75.0f / 100.0f + 25.0f) / 100.0f;  // Map 0-100 to 25-100 for better visualisation
     hourly_data[i].sun = source_data[i].sunshine_duration / 3600.0f;
     //hourly_data[i].sun = source_data[i].is_day ? (100.0f - source_data[i].cloud_cover) / 100.0f : 0;
   }

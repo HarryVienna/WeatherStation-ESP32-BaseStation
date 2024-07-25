@@ -18,6 +18,7 @@
 #define COLOR_DARKBLUE 0x00007F
 #define COLOR_GREY 0x2E2E2E
 #define COLOR_BLACK 0x000000
+#define COLOR_WHITE 0xFFFFFF
 
 // Day names
 static const char* DAY_NAMES[7] = { "So", "Mo", "Di", "Mi" , "Do" , "Fr" , "Sa" };
