@@ -89,7 +89,7 @@ void init_backlight(void) {
  * @param[in] brightness The brightness level to set (0-255).
  */
 void set_backlight_brightness(uint8_t brightness) {
-    ESP_LOGI(TAG, "Setting LCD backlight brightness to %d", brightness);
+    //ESP_LOGI(TAG, "Setting LCD backlight brightness to %d", brightness);
 
     ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL, brightness);
     ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL);

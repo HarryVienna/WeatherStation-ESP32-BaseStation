@@ -544,6 +544,11 @@ void disp_daily_weather(daily_weather_data_t *source_data) {
   lv_daily_chart_refresh(ui_DailyChart);
 }
 
+void set_brightness(uint8_t brightness)
+{
+  set_backlight_brightness(brightness);
+}
+
 // -------- Setup Screen --------
 
 void disp_wifi_networks(char* allNetworks)

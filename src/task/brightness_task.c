@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 #include "esp_log.h"
 
@@ -15,6 +16,7 @@
 
 #include "brightness_task.h"
 
+#include "gui/gui.h"
 #include "config/config.h"
 
 // Pin 19 --> https://www.espressif.com/sites/default/files/documentation/esp32-s3_technical_reference_manual_en.pdf#subsection.39.3
@@ -23,6 +25,29 @@
 #define ADC_ATTEN ADC_ATTEN_DB_12
 
 static const char* TAG = "brightness_task";
+
+/**
+ * @brief     Map sensor value to a corresponding brightness level
+ *
+ * @param     value   Sensor value to be mapped to brightness
+ *
+ * @return    uint8_t The mapped brightness level
+ *
+ * @details   Maps sensor values within a specified range to corresponding brightness levels.
+ *            Uses logarithmic scaling to convert sensor values to a suitable brightness scale.
+ */
+uint8_t map_brightness(uint16_t lux, bool presence) {
+
+  float a = 63.0f;
+  float b = -61.0f;
+
+  uint8_t brightness = (uint8_t)(a * log10(lux) + b) * presence;
+
+  //ESP_LOGI(TAG, "                 Mapped value %f %d", brightness, (uint8_t)brightness); 
+
+  return (uint8_t)brightness;
+}
+
 
 /**
  * @brief     Task for adjusting brightness based on sensor readings
@@ -45,7 +70,6 @@ void brightness_task(void *pvParameter){
   bh1750_power_on(&lux_sensor);
   bh1750_set_measure_time(&lux_sensor, 254);
   bh1750_send_opcode(&lux_sensor, CONT_HIGH_MODE);
-
 
 
   // Init presence sensor
@@ -77,14 +101,38 @@ void brightness_task(void *pvParameter){
 
   uint16_t lux;
   presence_data_t presence_data;
+
+  // Hysteresis thresholds
+  const uint8_t threshold = 10; 
+
+  uint8_t target_brightness, current_brightness;   
+  current_brightness = 127;
+
   for (;;) {
 
     bh1750_read(&lux_sensor, &lux);
     sen0610_get_presence_status(&presence_sensor, &presence_data);
 
-    ESP_LOGI(TAG, "lux  = %d Presence %d   Distance %d", lux, presence_data.presence, presence_data.range);
+    target_brightness = map_brightness(lux, presence_data.presence);
 
-    vTaskDelay(pdMS_TO_TICKS(250)); // Sleep for 1 second
+    ESP_LOGI(TAG, "current_brightness = %d   target_brightnessux  = %d", current_brightness, target_brightness);
+
+    int16_t brightness_difference = target_brightness - current_brightness;
+
+    if (abs(brightness_difference) >= threshold) {
+      int direction = (brightness_difference > 0) ? 1 : -1;
+
+      while (current_brightness != target_brightness) {
+        current_brightness += direction;
+
+        set_brightness(current_brightness);
+        vTaskDelay(pdMS_TO_TICKS(25));
+      }
+    }
+
+    //ESP_LOGI(TAG, "lux  = %d Presence %d   Distance %d", lux, presence_data.presence, presence_data.range);
+
+    vTaskDelay(pdMS_TO_TICKS(250));
   }
 
 
