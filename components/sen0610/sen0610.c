@@ -57,7 +57,7 @@ esp_err_t write_reg_i2c(sen0610_t *sensor, uint8_t reg, uint8_t *data, uint8_t l
     i2c_master_write_byte(cmd, reg, true); // Write register address
     i2c_master_write(cmd, data, len, true); // Write data
     i2c_master_stop(cmd);
-    esp_err_t ret = i2c_master_cmd_begin(sensor->i2c_port, cmd, portMAX_DELAY);
+    esp_err_t ret = i2c_master_cmd_begin(sensor->i2c_port, cmd, pdMS_TO_TICKS(1000));
     i2c_cmd_link_delete(cmd);
     return ret;
 }
@@ -75,7 +75,7 @@ esp_err_t read_reg_i2c(sen0610_t *sensor, uint8_t reg, uint8_t *data, uint8_t le
     i2c_master_write_byte(cmd, (sensor->i2c_addr << 1) | I2C_MASTER_READ, true); // Set for reading
     i2c_master_read(cmd, data, len, I2C_MASTER_LAST_NACK); // Read data with NACK on last byte
     i2c_master_stop(cmd);
-    esp_err_t ret = i2c_master_cmd_begin(sensor->i2c_port, cmd, portMAX_DELAY);
+    esp_err_t ret = i2c_master_cmd_begin(sensor->i2c_port, cmd, pdMS_TO_TICKS(1000));
     i2c_cmd_link_delete(cmd);
     return ret;
 }

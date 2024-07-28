@@ -234,7 +234,7 @@ void init_wifi(void) {
         ESP_LOGE(TAG, "Failed to set mode");   
     }
 
-    // Set storage to flash
+    // Set storage to RAM
     if (esp_wifi_set_storage(WIFI_STORAGE_RAM) != ESP_OK) {
         ESP_LOGE(TAG, "Failed to set storage");
     }
