@@ -5,7 +5,7 @@ SET(SOURCES screens/ui_SetupScreen.c
     ui_helpers.c
     ui_events.cpp
     images/ui_img_wifi_off_png.c
-    images/ui_img_04d_png.c
+    images/ui_img_1d_png.c
     images/ui_img_cloud_png.c
     images/ui_img_uv_png.c
     images/ui_img_arrow_png.c
@@ -15,23 +15,35 @@ SET(SOURCES screens/ui_SetupScreen.c
     images/ui_img_pressure_png.c
     images/ui_img_battery_png.c
     images/ui_img_clock_png.c
-    images/ui_img_01d_png.c
-    images/ui_img_01n_png.c
-    images/ui_img_02d_png.c
-    images/ui_img_02n_png.c
-    images/ui_img_03d_png.c
-    images/ui_img_03n_png.c
-    images/ui_img_04n_png.c
-    images/ui_img_09d_png.c
-    images/ui_img_09n_png.c
-    images/ui_img_10d_png.c
-    images/ui_img_10n_png.c
-    images/ui_img_11d_png.c
-    images/ui_img_11n_png.c
-    images/ui_img_13d_png.c
-    images/ui_img_13n_png.c
-    images/ui_img_50d_png.c
-    images/ui_img_50n_png.c
+    images/ui_img_0d_png.c
+    images/ui_img_0n_png.c
+    images/ui_img_1n_png.c
+    images/ui_img_2_png.c
+    images/ui_img_3_png.c
+    images/ui_img_45_png.c
+    images/ui_img_48_png.c
+    images/ui_img_51_png.c
+    images/ui_img_53_png.c
+    images/ui_img_55_png.c
+    images/ui_img_56_png.c
+    images/ui_img_57_png.c
+    images/ui_img_61_png.c
+    images/ui_img_63_png.c
+    images/ui_img_65_png.c
+    images/ui_img_66_png.c
+    images/ui_img_67_png.c
+    images/ui_img_71_png.c
+    images/ui_img_73_png.c
+    images/ui_img_75_png.c
+    images/ui_img_77_png.c
+    images/ui_img_80_png.c
+    images/ui_img_81_png.c
+    images/ui_img_82_png.c
+    images/ui_img_85_png.c
+    images/ui_img_86_png.c
+    images/ui_img_95_png.c
+    images/ui_img_96_png.c
+    images/ui_img_99_png.c
     images/ui_img_wifi_on_png.c
     fonts/ui_font_FreeSans10.c
     fonts/ui_font_FreeSans14.c

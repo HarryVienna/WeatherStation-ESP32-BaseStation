@@ -195,6 +195,7 @@ lv_obj_t * ui_HourlyChart;
 lv_obj_t * ui_Daily;
 lv_obj_t * ui_DailyChart;
 lv_obj_t * ui____initial_actions0;
+const lv_img_dsc_t * ui_imgset_[26] = {&ui_img_2_png, &ui_img_3_png, &ui_img_45_png, &ui_img_48_png, &ui_img_51_png, &ui_img_53_png, &ui_img_55_png, &ui_img_56_png, &ui_img_57_png, &ui_img_61_png, &ui_img_63_png, &ui_img_65_png, &ui_img_66_png, &ui_img_67_png, &ui_img_71_png, &ui_img_73_png, &ui_img_75_png, &ui_img_77_png, &ui_img_80_png, &ui_img_81_png, &ui_img_82_png, &ui_img_85_png, &ui_img_86_png, &ui_img_95_png, &ui_img_96_png, &ui_img_99_png};
 
 ///////////////////// TEST LVGL SETTINGS ////////////////////
 #if LV_COLOR_DEPTH != 16
@@ -212,7 +213,7 @@ void ui_event_SetupScreen(lv_event_t * e)
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_SCREEN_LOADED) {
-        event_screen_loaded(e);
+        event_setup_screen_loaded(e);
     }
 }
 void ui_event_ButtonScan(lv_event_t * e)
@@ -306,7 +307,7 @@ void ui_event_DropdownRegion(lv_event_t * e)
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_VALUE_CHANGED) {
-        event_value_changed(e);
+        event_timezone_value_changed(e);
     }
 }
 void ui_event_TextAreaBasis(lv_event_t * e)
@@ -404,11 +405,9 @@ void ui_init(void)
     lv_disp_t * dispp = lv_disp_get_default();
     lv_theme_t * theme = lv_theme_default_init(dispp, lv_palette_main(LV_PALETTE_BLUE), lv_palette_main(LV_PALETTE_RED),
                                                false, LV_FONT_DEFAULT);
-
     lv_disp_set_theme(dispp, theme);
     ui_SetupScreen_screen_init();
     ui_WeatherstationScreen_screen_init();
     ui____initial_actions0 = lv_obj_create(NULL);
-
     lv_disp_load_scr(ui_SetupScreen);
 }

@@ -110,7 +110,7 @@ void ui_WeatherstationScreen_screen_init(void)
     lv_obj_set_style_pad_column(ui_Panel15, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_WeatherIcon = lv_img_create(ui_Panel15);
-    lv_img_set_src(ui_WeatherIcon, &ui_img_1d_png);
+    lv_img_set_src(ui_WeatherIcon, &ui_img_04d_png);
     lv_obj_set_width(ui_WeatherIcon, 90);
     lv_obj_set_height(ui_WeatherIcon, 90);
     lv_obj_set_align(ui_WeatherIcon, LV_ALIGN_CENTER);

@@ -202,7 +202,7 @@ extern lv_obj_t * ui____initial_actions0;
 
 
 LV_IMG_DECLARE(ui_img_wifi_off_png);    // assets/wifi_off.png
-LV_IMG_DECLARE(ui_img_04d_png);    // assets/04d.png
+LV_IMG_DECLARE(ui_img_1d_png);    // assets/1d.png
 LV_IMG_DECLARE(ui_img_cloud_png);    // assets/cloud.png
 LV_IMG_DECLARE(ui_img_uv_png);    // assets/uv.png
 LV_IMG_DECLARE(ui_img_arrow_png);    // assets/arrow.png
@@ -212,23 +212,35 @@ LV_IMG_DECLARE(ui_img_humidity_png);    // assets/humidity.png
 LV_IMG_DECLARE(ui_img_pressure_png);    // assets/pressure.png
 LV_IMG_DECLARE(ui_img_battery_png);    // assets/battery.png
 LV_IMG_DECLARE(ui_img_clock_png);    // assets/clock.png
-LV_IMG_DECLARE(ui_img_01d_png);    // assets/01d.png
-LV_IMG_DECLARE(ui_img_01n_png);    // assets/01n.png
-LV_IMG_DECLARE(ui_img_02d_png);    // assets/02d.png
-LV_IMG_DECLARE(ui_img_02n_png);    // assets/02n.png
-LV_IMG_DECLARE(ui_img_03d_png);    // assets/03d.png
-LV_IMG_DECLARE(ui_img_03n_png);    // assets/03n.png
-LV_IMG_DECLARE(ui_img_04n_png);    // assets/04n.png
-LV_IMG_DECLARE(ui_img_09d_png);    // assets/09d.png
-LV_IMG_DECLARE(ui_img_09n_png);    // assets/09n.png
-LV_IMG_DECLARE(ui_img_10d_png);    // assets/10d.png
-LV_IMG_DECLARE(ui_img_10n_png);    // assets/10n.png
-LV_IMG_DECLARE(ui_img_11d_png);    // assets/11d.png
-LV_IMG_DECLARE(ui_img_11n_png);    // assets/11n.png
-LV_IMG_DECLARE(ui_img_13d_png);    // assets/13d.png
-LV_IMG_DECLARE(ui_img_13n_png);    // assets/13n.png
-LV_IMG_DECLARE(ui_img_50d_png);    // assets/50d.png
-LV_IMG_DECLARE(ui_img_50n_png);    // assets/50n.png
+LV_IMG_DECLARE(ui_img_0d_png);    // assets/0d.png
+LV_IMG_DECLARE(ui_img_0n_png);    // assets/0n.png
+LV_IMG_DECLARE(ui_img_1n_png);    // assets/1n.png
+LV_IMG_DECLARE(ui_img_2_png);    // assets/2.png
+LV_IMG_DECLARE(ui_img_3_png);    // assets/3.png
+LV_IMG_DECLARE(ui_img_45_png);    // assets/45.png
+LV_IMG_DECLARE(ui_img_48_png);    // assets/48.png
+LV_IMG_DECLARE(ui_img_51_png);    // assets/51.png
+LV_IMG_DECLARE(ui_img_53_png);    // assets/53.png
+LV_IMG_DECLARE(ui_img_55_png);    // assets/55.png
+LV_IMG_DECLARE(ui_img_56_png);    // assets/56.png
+LV_IMG_DECLARE(ui_img_57_png);    // assets/57.png
+LV_IMG_DECLARE(ui_img_61_png);    // assets/61.png
+LV_IMG_DECLARE(ui_img_63_png);    // assets/63.png
+LV_IMG_DECLARE(ui_img_65_png);    // assets/65.png
+LV_IMG_DECLARE(ui_img_66_png);    // assets/66.png
+LV_IMG_DECLARE(ui_img_67_png);    // assets/67.png
+LV_IMG_DECLARE(ui_img_71_png);    // assets/71.png
+LV_IMG_DECLARE(ui_img_73_png);    // assets/73.png
+LV_IMG_DECLARE(ui_img_75_png);    // assets/75.png
+LV_IMG_DECLARE(ui_img_77_png);    // assets/77.png
+LV_IMG_DECLARE(ui_img_80_png);    // assets/80.png
+LV_IMG_DECLARE(ui_img_81_png);    // assets/81.png
+LV_IMG_DECLARE(ui_img_82_png);    // assets/82.png
+LV_IMG_DECLARE(ui_img_85_png);    // assets/85.png
+LV_IMG_DECLARE(ui_img_86_png);    // assets/86.png
+LV_IMG_DECLARE(ui_img_95_png);    // assets/95.png
+LV_IMG_DECLARE(ui_img_96_png);    // assets/96.png
+LV_IMG_DECLARE(ui_img_99_png);    // assets/99.png
 LV_IMG_DECLARE(ui_img_wifi_on_png);    // assets/wifi_on.png
 
 

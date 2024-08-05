@@ -87,7 +87,7 @@ void sensor_sen55_task(void *pvParameter) {
     //
     // Adjust temp_offset in degrees celsius to account for additional
     // temperature offsets exceeding the SEN module's self heating.
-    float temp_offset = 0.0f;
+    float temp_offset = -3.1f;
     int16_t default_slope = 0;
     uint16_t default_time_constant = 0;
     error = sen5x_set_temperature_offset_parameters(

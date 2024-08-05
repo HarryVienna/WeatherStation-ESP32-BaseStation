@@ -21,7 +21,7 @@
 static const char *WEATHER_URL_BASE = "https://api.open-meteo.com/v1/forecast";
 static const char *WEATHER_URL_CURRENT = "https://api.open-meteo.com/v1/forecast?latitude=48.2144&longitude=16.3234&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,weather_code,cloud_cover,wind_speed_10m,wind_direction_10m,wind_gusts_10m,uv_index&timeformat=unixtime&timezone=auto";
 static const char *WEATHER_URL_HOURLY = "https://api.open-meteo.com/v1/forecast?latitude=48.2167&longitude=16.3&hourly=temperature_2m,precipitation_probability,rain,showers,snowfall,wind_speed_10m,wind_gusts_10m,sunshine_duration,cloud_cover,is_day&timeformat=unixtime&timezone=auto&forecast_days=3";
-static const char *WEATHER_URL_DAILY  = "https://api.open-meteo.com/v1/forecast?latitude=48.2167&longitude=16.3&daily=temperature_2m_max,temperature_2m_min,daylight_duration,sunshine_duration,rain_sum,showers_sum,snowfall_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max&timeformat=unixtime&timezone=auto";
+static const char *WEATHER_URL_DAILY  = "https://api.open-meteo.com/v1/forecast?latitude=48.2167&longitude=16.3&daily=temperature_2m_max,temperature_2m_min,daylight_duration,sunshine_duration,rain_sum,showers_sum,snowfall_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,sunrise,sunset&timeformat=unixtime&timezone=auto";
 
 static const char* TAG = "weather_task";
 
@@ -109,7 +109,7 @@ void weather_task(void *pvParameter) {
     esp_http_client_handle_t client = esp_http_client_init(&config);
 
     for (;;) {
-        // ------- Hourly data -------
+        // ------- Current data -------
         ESP_LOGI(TAG, "Call current weather API ");
 
         esp_http_client_set_url(client, WEATHER_URL_CURRENT);
@@ -142,10 +142,7 @@ void weather_task(void *pvParameter) {
                 current_data.wind_direction_10m = cJSON_GetObjectItem(current, "wind_direction_10m")->valueint;
                 current_data.wind_gusts_10m = cJSON_GetObjectItem(current, "wind_gusts_10m")->valuedouble;
                 current_data.uv_index = cJSON_GetObjectItem(current, "uv_index")->valuedouble;
-
-                xSemaphoreTakeRecursive(lvgl_mux, portMAX_DELAY);
-                disp_current_weather(&current_data);
-                xSemaphoreGiveRecursive(lvgl_mux);                
+          
             }
             
             cJSON_Delete(json);
@@ -222,10 +219,7 @@ void weather_task(void *pvParameter) {
                     hourly_data[i].cloud_cover = cJSON_GetArrayItem(cloud_cover, i + currentHour)->valuedouble;
                     hourly_data[i].is_day = cJSON_GetArrayItem(is_day, i + currentHour)->valueint;
                 }
-
-                xSemaphoreTakeRecursive(lvgl_mux, portMAX_DELAY);
-                disp_hourly_weather(hourly_data);
-                xSemaphoreGiveRecursive(lvgl_mux);                
+           
             }
             
             cJSON_Delete(json);
@@ -277,12 +271,14 @@ void weather_task(void *pvParameter) {
                 cJSON *precipitation_probability_max  = cJSON_GetObjectItem(daily, "precipitation_probability_max");
                 cJSON *wind_speed_10m_max   = cJSON_GetObjectItem(daily, "wind_speed_10m_max");
                 cJSON *wind_gusts_10m_max   = cJSON_GetObjectItem(daily, "wind_gusts_10m_max");
+                cJSON *sunrise = cJSON_GetObjectItem(daily, "sunrise");
+                cJSON *sunset = cJSON_GetObjectItem(daily, "sunset");
 
                 // Iterate through the "daily" data array
                 for (int i = 0; i < 7; i++) {
 
-                    time_t unixTimestamp = (time_t)cJSON_GetArrayItem(time, i)->valueint;
-                    localtime_r(&unixTimestamp, &daily_data[i].time); 
+                    time_t timeTimestamp = (time_t)cJSON_GetArrayItem(time, i)->valueint;
+                    localtime_r(&timeTimestamp, &daily_data[i].time); 
                     daily_data[i].temperature_2m_max = cJSON_GetArrayItem(temperature_2m_max, i)->valuedouble;
                     daily_data[i].temperature_2m_min = cJSON_GetArrayItem(temperature_2m_min, i)->valuedouble;
                     daily_data[i].daylight_duration = cJSON_GetArrayItem(daylight_duration, i)->valuedouble;
@@ -293,11 +289,12 @@ void weather_task(void *pvParameter) {
                     daily_data[i].precipitation_probability_max = cJSON_GetArrayItem(precipitation_probability_max, i)->valuedouble;
                     daily_data[i].wind_speed_10m_max = cJSON_GetArrayItem(wind_speed_10m_max, i)->valuedouble;
                     daily_data[i].wind_gusts_10m_max = cJSON_GetArrayItem(wind_gusts_10m_max, i)->valuedouble;
+                    time_t sunriseTimestamp = (time_t)cJSON_GetArrayItem(sunrise, i)->valueint;
+                    localtime_r(&sunriseTimestamp, &daily_data[i].sunrise); 
+                    time_t sunsetTimestamp = (time_t)cJSON_GetArrayItem(sunset, i)->valueint;
+                    localtime_r(&sunsetTimestamp, &daily_data[i].sunset); 
                 }
-
-                xSemaphoreTakeRecursive(lvgl_mux, portMAX_DELAY);
-                disp_daily_weather(daily_data);
-                xSemaphoreGiveRecursive(lvgl_mux);                
+              
             }
             
             cJSON_Delete(json);
@@ -314,6 +311,10 @@ void weather_task(void *pvParameter) {
         }
 
         esp_http_client_close(client);
+
+        xSemaphoreTakeRecursive(lvgl_mux, portMAX_DELAY);
+        disp_weather(&current_data, hourly_data, daily_data);
+        xSemaphoreGiveRecursive(lvgl_mux);    
 
         vTaskDelay(pdMS_TO_TICKS(1000 * 60 *15)); // Every 15 Minutes
     }

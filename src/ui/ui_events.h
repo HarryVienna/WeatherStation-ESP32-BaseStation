@@ -10,10 +10,10 @@
 extern "C" {
 #endif
 
-void event_screen_loaded(lv_event_t * e);
+void event_setup_screen_loaded(lv_event_t * e);
 void event_wifi_scan(lv_event_t * e);
 void event_wifi_connect(lv_event_t * e);
-void event_value_changed(lv_event_t * e);
+void event_timezone_value_changed(lv_event_t * e);
 void event_weatherstation_start(lv_event_t * e);
 
 #ifdef __cplusplus

@@ -175,7 +175,7 @@ void ui_SetupScreen_screen_init(void)
     lv_obj_set_align(ui_PanelAppId, LV_ALIGN_CENTER);
     lv_obj_set_flex_flow(ui_PanelAppId, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(ui_PanelAppId, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    lv_obj_clear_flag(ui_PanelAppId, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_clear_flag(ui_PanelAppId, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_border_width(ui_PanelAppId, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_left(ui_PanelAppId, 20, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_right(ui_PanelAppId, 20, LV_PART_MAIN | LV_STATE_DEFAULT);

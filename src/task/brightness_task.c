@@ -29,23 +29,58 @@ static const char* TAG = "brightness_task";
 /**
  * @brief     Map sensor value to a corresponding brightness level
  *
- * @param     value   Sensor value to be mapped to brightness
+ * @param     lux   Sensor value to be mapped to brightness
+ * @param     presence  Boolean value to show if a human is present
  *
  * @return    uint8_t The mapped brightness level
  *
  * @details   Maps sensor values within a specified range to corresponding brightness levels.
  *            Uses logarithmic scaling to convert sensor values to a suitable brightness scale.
+ * 
+ *            The values for a and b are calculated with this Python program:
+ * 
+ *  import numpy as np
+ *  from scipy.optimize import curve_fit
+ *
+ *  # Function
+ *  def log_funktion(x, a, b):
+ *      return a * np.log10(x) + b
+ *
+ *  # Input and Output values
+ *  lux = np.array([1, 1000])
+ *  display_brightness = np.array([16,  128])
+
+ *  # Find the optimal parmaters with curve_fit
+ *  params, _ = curve_fit(log_funktion, lux, display_brightness)
+ *  a_scipy, b_scipy = params
+ *
+ *  print(f"Optimal parameters (SciPy): a = {a_scipy:.2f}, b = {b_scipy:.2f}")
+ *
+ *
+ *  for i in range(len(lux)):
+ *      # Calculate the values for the input array
+ *      output_brightness = log_funktion(lux[i], a_scipy, b_scipy)
+ *      print("Brightness:", lux[i], output_brightness)
+ *
+ *
  */
 uint8_t map_brightness(uint16_t lux, bool presence) {
 
-  float a = 63.0f;
-  float b = -61.0f;
+  float a = 37.33f;
+  float b = 16.0f;
 
-  uint8_t brightness = (uint8_t)(a * log10(lux) + b) * presence;
-
+  uint8_t brightness;
+  
+  if (lux == 0) {
+    brightness = 16;
+  }
+  else {
+    brightness = (uint8_t)(a * log10(lux) + b);
+  }
+   
   //ESP_LOGI(TAG, "                 Mapped value %f %d", brightness, (uint8_t)brightness); 
 
-  return (uint8_t)brightness;
+  return brightness * presence;
 }
 
 
@@ -115,7 +150,7 @@ void brightness_task(void *pvParameter){
 
     target_brightness = map_brightness(lux, presence_data.presence);
 
-    ESP_LOGI(TAG, "current_brightness = %d   target_brightnessux  = %d", current_brightness, target_brightness);
+    ESP_LOGI(TAG, "LUX = %d   brightness  = %d   Presence= %d", lux, target_brightness, presence_data.presence);
 
     int16_t brightness_difference = target_brightness - current_brightness;
 

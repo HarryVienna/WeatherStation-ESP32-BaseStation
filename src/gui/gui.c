@@ -26,6 +26,74 @@ static const char* TAG = "GUI";
 
 extern SemaphoreHandle_t lvgl_mux;
 
+#define NUM_ICONS 28
+
+typedef struct
+{
+  const uint8_t icon;
+  const lv_img_dsc_t *icon_image;
+} icon_mapping_t;
+
+icon_mapping_t icon_mapping_day[] = {
+      {0, &ui_img_0d_png},
+      {1, &ui_img_1d_png},
+      {2, &ui_img_2_png},
+      {3, &ui_img_3_png},
+      {45, &ui_img_45_png},
+      {48, &ui_img_48_png},
+      {51, &ui_img_51_png},
+      {53, &ui_img_53_png},
+      {55, &ui_img_55_png},
+      {56, &ui_img_56_png},
+      {57, &ui_img_57_png},
+      {61, &ui_img_61_png},
+      {63, &ui_img_63_png},
+      {65, &ui_img_65_png},
+      {66, &ui_img_66_png},
+      {67, &ui_img_67_png},
+      {71, &ui_img_71_png},
+      {73, &ui_img_73_png},
+      {75, &ui_img_75_png},
+      {77, &ui_img_77_png},
+      {80, &ui_img_80_png},
+      {81, &ui_img_81_png},
+      {82, &ui_img_82_png},
+      {85, &ui_img_85_png},
+      {86, &ui_img_86_png},
+      {95, &ui_img_95_png},
+      {96, &ui_img_96_png},
+      {99, &ui_img_99_png}};
+
+icon_mapping_t icon_mapping_night[] = {
+      {0, &ui_img_0n_png},
+      {1, &ui_img_1n_png},
+      {2, &ui_img_2_png},
+      {3, &ui_img_3_png},
+      {45, &ui_img_45_png},
+      {48, &ui_img_48_png},
+      {51, &ui_img_51_png},
+      {53, &ui_img_53_png},
+      {55, &ui_img_55_png},
+      {56, &ui_img_56_png},
+      {57, &ui_img_57_png},
+      {61, &ui_img_61_png},
+      {63, &ui_img_63_png},
+      {65, &ui_img_65_png},
+      {66, &ui_img_66_png},
+      {67, &ui_img_67_png},
+      {71, &ui_img_71_png},
+      {73, &ui_img_73_png},
+      {75, &ui_img_75_png},
+      {77, &ui_img_77_png},
+      {80, &ui_img_80_png},
+      {81, &ui_img_81_png},
+      {82, &ui_img_82_png},
+      {85, &ui_img_85_png},
+      {86, &ui_img_86_png},
+      {95, &ui_img_95_png},
+      {96, &ui_img_96_png},
+      {99, &ui_img_99_png}};      
+
 const char *regionNames[] = {
     "Africa", "America", "Antarctica", "Arctic", "Asia", "Atlantic", "Australia", "Europe", "Indian", "Pacific"};
 
@@ -481,68 +549,94 @@ void disp_sen5x(float ambientTemperature, float ambientHumidity, float massConce
   }
 }
 
-void disp_current_weather(current_weather_data_t *source_data) {
+void disp_weather(current_weather_data_t *current_weather, hourly_weather_data_t *hourly_weather, daily_weather_data_t *daily_weather) {
 
+  // Daily data
   char temp[8];
   char clouds[8];
   char uv_index[8];
   char wind_speed[8];
   char wind_gust[8];
+  char str_sunrise[8];
+  char str_sunset[8];
 
-  sprintf(temp, "%.1f", source_data->temperature_2m);
+  icon_mapping_t *icon_mapping;
+  if (current_weather->is_day) {
+    icon_mapping = icon_mapping_day;
+  }
+  else {
+    icon_mapping = icon_mapping_night;
+  }
+
+  for (uint8_t i = 0; i < NUM_ICONS; i++)
+  {
+    if (current_weather->weather_code == icon_mapping[i].icon)
+    {
+      ESP_LOGI(TAG, "Weather code %d", current_weather->weather_code);
+      lv_img_set_src(ui_WeatherIcon, icon_mapping[i].icon_image);
+      break;
+    }
+  }
+
+  sprintf(temp, "%.1f", current_weather->temperature_2m);
   lv_label_set_text(ui_TempCurrent, temp);
 
-  sprintf(clouds, "%d", source_data->cloud_cover);
+  sprintf(clouds, "%d", current_weather->cloud_cover);
   lv_label_set_text(ui_CloudsCurrent, clouds);
 
-  sprintf(uv_index, "%d", (int) round(source_data->uv_index));
+  sprintf(uv_index, "%d", (int) round(current_weather->uv_index));
   lv_label_set_text(ui_UvCurrent, uv_index);
 
-  sprintf(wind_speed, "%.1f", source_data->wind_speed_10m);
+  sprintf(wind_speed, "%.1f", current_weather->wind_speed_10m);
   lv_label_set_text(ui_WindSpeedCurrent, wind_speed);
 
-  sprintf(wind_gust, "%.1f", source_data->wind_gusts_10m);
+  sprintf(wind_gust, "%.1f", current_weather->wind_gusts_10m);
   lv_label_set_text(ui_WindGustCurrent, wind_gust);
 
-  lv_img_set_angle(ui_WindDirectionCurrentIcon, source_data->wind_direction_10m * 10);
+  lv_img_set_angle(ui_WindDirectionCurrentIcon, current_weather->wind_direction_10m * 10);
 
-}
+  struct tm time_sunrise = daily_weather[0].sunrise;
+  struct tm time_sunrset = daily_weather[0].sunset;
+  strftime(str_sunrise, sizeof(str_sunrise), "%H:%M", &time_sunrise);
+  lv_label_set_text(ui_SunriseCurrent, str_sunrise);
+  strftime(str_sunset, sizeof(str_sunset), "%H:%M", &time_sunrset);
+  lv_label_set_text(ui_SunsetCurrent, str_sunset);
 
-void disp_hourly_weather(hourly_weather_data_t *source_data) {
+  // Hourly data
   lv_hourly_data hourly_data[NUM_HOURS];
 
   for (int i = 0; i < NUM_HOURS; i++)
   {
-    hourly_data[i].dt = source_data[i].time;
-    hourly_data[i].temp = source_data[i].temperature_2m;
-    hourly_data[i].rain = source_data[i].rain + source_data[i].showers;
-    hourly_data[i].snow = source_data[i].snowfall * 10.0f / 7.0f;  // See docu from open-meteo.com  snow -> water
-    hourly_data[i].pop = (source_data[i].precipitation_probability * 75.0f / 100.0f + 25.0f) / 100.0f;  // Map 0-100 to 25-100 for better visualisation
-    hourly_data[i].sun = source_data[i].sunshine_duration / 3600.0f;
-    //hourly_data[i].sun = source_data[i].is_day ? (100.0f - source_data[i].cloud_cover) / 100.0f : 0;
+    hourly_data[i].dt = hourly_weather[i].time;
+    hourly_data[i].temp = hourly_weather[i].temperature_2m;
+    hourly_data[i].rain = hourly_weather[i].rain + hourly_weather[i].showers;
+    hourly_data[i].snow = hourly_weather[i].snowfall * 10.0f / 7.0f;  // See docu from open-meteo.com  snow -> water
+    hourly_data[i].pop = (hourly_weather[i].precipitation_probability * 75.0f / 100.0f + 25.0f) / 100.0f;  // Map 0-100 to 25-100 for better visualisation
+    hourly_data[i].sun = hourly_weather[i].sunshine_duration / 3600.0f;
+    //hourly_data[i].sun = hourly_weather[i].is_day ? (100.0f - source_data[i].cloud_cover) / 100.0f : 0;
   }
 
   lv_hourly_chart_set_data(ui_HourlyChart, hourly_data);
   lv_hourly_chart_refresh(ui_HourlyChart);
-}
 
-void disp_daily_weather(daily_weather_data_t *source_data) {
+  // Daily data
   lv_daily_data daily_data[NUM_DAYS];
 
   for (int i = 0; i < NUM_DAYS; i++)
   {
-    daily_data[i].dt = source_data[i].time;
-    daily_data[i].low_temp = source_data[i].temperature_2m_min;
-    daily_data[i].high_temp = source_data[i].temperature_2m_max;
-    daily_data[i].rain = source_data[i].rain_sum + source_data[i].showers_sum;
-    daily_data[i].snow = source_data[i].snowfall_sum * 10.0f / 7.0f;  // See docu from open-meteo.com  snow -> water
-    daily_data[i].pop = source_data[i].precipitation_probability_max / 100.0f;
-    daily_data[i].sun = source_data[i].sunshine_duration / source_data[i].daylight_duration;
+    daily_data[i].dt = daily_weather[i].time;
+    daily_data[i].low_temp = daily_weather[i].temperature_2m_min;
+    daily_data[i].high_temp = daily_weather[i].temperature_2m_max;
+    daily_data[i].rain = daily_weather[i].rain_sum + daily_weather[i].showers_sum;
+    daily_data[i].snow = daily_weather[i].snowfall_sum * 10.0f / 7.0f;  // See docu from open-meteo.com  snow -> water
+    daily_data[i].pop = daily_weather[i].precipitation_probability_max / 100.0f;
+    daily_data[i].sun = daily_weather[i].sunshine_duration / daily_weather[i].daylight_duration;
   }
 
   lv_daily_chart_set_data(ui_DailyChart, daily_data);
   lv_daily_chart_refresh(ui_DailyChart);
 }
+
 
 void set_brightness(uint8_t brightness)
 {
@@ -678,7 +772,7 @@ void start_tasks()
 
 // -------- LVGL Events --------
 
-void event_screen_loaded(lv_event_t *e)
+void event_setup_screen_loaded(lv_event_t *e)
 {
 
   nvs_handle_t nvs_handle;
@@ -720,7 +814,6 @@ void event_screen_loaded(lv_event_t *e)
   // get the region name
   char region[64];
   lv_dropdown_get_selected_str(ui_DropdownRegion, region, sizeof(region));
-  ESP_LOGI(TAG, "region %s", region);
   // fill the city list
   set_cities(region);
   // set the selected city id
@@ -769,7 +862,7 @@ void event_wifi_connect(lv_event_t *e)
 
 }
 
-void event_value_changed(lv_event_t *e)
+void event_timezone_value_changed(lv_event_t *e)
 {
   int selectedRegion = lv_dropdown_get_selected(ui_DropdownRegion);
   ESP_LOGI(TAG,"selectedRegion: %d", selectedRegion);

@@ -46,6 +46,8 @@ typedef struct {
     double precipitation_probability_max; // Maximum precipitation probability in %
     double wind_speed_10m_max;  // Maximum wind speed in km/h
     double wind_gusts_10m_max;  // Maximum wind gusts in km/h
+    struct tm sunrise;          // Store the sunrise in a struct tm
+    struct tm sunset;           // Store the sunset in a struct tm
 } daily_weather_data_t;
 
 #ifdef __cplusplus
