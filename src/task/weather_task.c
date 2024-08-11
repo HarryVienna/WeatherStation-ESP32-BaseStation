@@ -10,6 +10,7 @@
 #include "esp_http_client.h"
 #include "esp_tls.h"
 #include "esp_crt_bundle.h"
+#include "nvs/preferences.h"
 
 #include "gui/gui.h"
 
@@ -19,9 +20,27 @@
 #include "cJSON.h"
 
 static const char *WEATHER_URL_BASE = "https://api.open-meteo.com/v1/forecast";
-static const char *WEATHER_URL_CURRENT = "https://api.open-meteo.com/v1/forecast?latitude=48.2144&longitude=16.3234&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,weather_code,cloud_cover,wind_speed_10m,wind_direction_10m,wind_gusts_10m,uv_index&timeformat=unixtime&timezone=auto";
-static const char *WEATHER_URL_HOURLY = "https://api.open-meteo.com/v1/forecast?latitude=48.2167&longitude=16.3&hourly=temperature_2m,precipitation_probability,rain,showers,snowfall,wind_speed_10m,wind_gusts_10m,sunshine_duration,cloud_cover,is_day&timeformat=unixtime&timezone=auto&forecast_days=3";
-static const char *WEATHER_URL_DAILY  = "https://api.open-meteo.com/v1/forecast?latitude=48.2167&longitude=16.3&daily=temperature_2m_max,temperature_2m_min,daylight_duration,sunshine_duration,rain_sum,showers_sum,snowfall_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,sunrise,sunset&timeformat=unixtime&timezone=auto";
+
+static const char *WEATHER_URL_CURRENT = 
+        "https://api.open-meteo.com/v1/forecast?"
+        "latitude=%s&longitude=%s&"
+        "current=temperature_2m,relative_humidity_2m,apparent_temperature,"
+        "is_day,weather_code,cloud_cover,wind_speed_10m,wind_direction_10m,wind_gusts_10m,uv_index&"
+        "timeformat=unixtime&timezone=auto";
+
+static const char *WEATHER_URL_HOURLY = "https://api.open-meteo.com/v1/forecast?"
+        "latitude=%s&longitude=%s&"
+        "hourly=temperature_2m,precipitation_probability,rain,showers,snowfall,"
+        "wind_speed_10m,wind_gusts_10m,sunshine_duration,cloud_cover,is_day&"
+        "timeformat=unixtime&timezone=auto&forecast_days=3";
+
+static const char *WEATHER_URL_DAILY  = "https://api.open-meteo.com/v1/forecast?"
+        "latitude=%s&longitude=%s&"
+        "daily=temperature_2m_max,temperature_2m_min,"
+        "daylight_duration,sunshine_duration,"
+        "rain_sum,showers_sum,snowfall_sum,precipitation_probability_max,"
+        "wind_speed_10m_max,wind_gusts_10m_max,sunrise,sunset&"
+        "timeformat=unixtime&timezone=auto";
 
 static const char* TAG = "weather_task";
 
@@ -90,7 +109,18 @@ void weather_task(void *pvParameter) {
     
     ESP_LOGI(TAG, "Start Weather task");
 
+    nvs_handle_t nvs_handle;
+    nvs_open("weatherstation", NVS_READONLY, &nvs_handle);
+
+    char* latitude = get_string_from_nvs(nvs_handle, "latitude", "");
+    char* longitude =get_string_from_nvs(nvs_handle, "longitude", "");
+
+    nvs_close(nvs_handle);
+
+
     esp_err_t err;
+
+    char url[512];
 
     current_weather_data_t current_data;
     hourly_weather_data_t hourly_data[48];
@@ -102,7 +132,7 @@ void weather_task(void *pvParameter) {
         .event_handler = _http_event_handler,
         .url = WEATHER_URL_BASE,
         .crt_bundle_attach = esp_crt_bundle_attach,
-        .user_data =  &response, // Pass the response buffer to the event handler
+        .user_data = &response, // Pass the response buffer to the event handler
         .disable_auto_redirect = true,
     };
 
@@ -112,7 +142,9 @@ void weather_task(void *pvParameter) {
         // ------- Current data -------
         ESP_LOGI(TAG, "Call current weather API ");
 
-        esp_http_client_set_url(client, WEATHER_URL_CURRENT);
+        sprintf(url, WEATHER_URL_CURRENT, latitude, longitude);
+
+        esp_http_client_set_url(client, url);
 
         err = esp_http_client_perform(client);
         if (err == ESP_OK) {
@@ -164,7 +196,9 @@ void weather_task(void *pvParameter) {
         // ------- Hourly data -------
         ESP_LOGI(TAG, "Call hourly weather API ");
 
-        esp_http_client_set_url(client, WEATHER_URL_HOURLY);
+        sprintf(url, WEATHER_URL_HOURLY, latitude, longitude);
+
+        esp_http_client_set_url(client, url);
 
         err = esp_http_client_perform(client);
         if (err == ESP_OK) {
@@ -240,7 +274,9 @@ void weather_task(void *pvParameter) {
         // ------- Daily data -------
         ESP_LOGI(TAG, "Call daily weather API ");
 
-        esp_http_client_set_url(client, WEATHER_URL_DAILY);
+        sprintf(url, WEATHER_URL_DAILY, latitude, longitude);
+
+        esp_http_client_set_url(client, url);
 
         err = esp_http_client_perform(client);
         if (err == ESP_OK) {

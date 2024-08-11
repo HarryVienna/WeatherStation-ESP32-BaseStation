@@ -66,13 +66,13 @@ static const char* TAG = "brightness_task";
  */
 uint8_t map_brightness(uint16_t lux, bool presence) {
 
-  float a = 37.33f;
-  float b = 16.0f;
+  float a = 42.33f;
+  float b = 1.00f;
 
   uint8_t brightness;
   
-  if (lux == 0) {
-    brightness = 16;
+  if (lux == 0 || !presence) {
+    brightness = 1;
   }
   else {
     brightness = (uint8_t)(a * log10(lux) + b);
@@ -80,7 +80,7 @@ uint8_t map_brightness(uint16_t lux, bool presence) {
    
   //ESP_LOGI(TAG, "                 Mapped value %f %d", brightness, (uint8_t)brightness); 
 
-  return brightness * presence;
+  return brightness;
 }
 
 
@@ -150,7 +150,7 @@ void brightness_task(void *pvParameter){
 
     target_brightness = map_brightness(lux, presence_data.presence);
 
-    ESP_LOGI(TAG, "LUX = %d   brightness  = %d   Presence= %d", lux, target_brightness, presence_data.presence);
+    //ESP_LOGI(TAG, "Lux = %d   Brightness  = %d   Presence= %d", lux, target_brightness, presence_data.presence);
 
     int16_t brightness_difference = target_brightness - current_brightness;
 
@@ -164,8 +164,6 @@ void brightness_task(void *pvParameter){
         vTaskDelay(pdMS_TO_TICKS(25));
       }
     }
-
-    //ESP_LOGI(TAG, "lux  = %d Presence %d   Distance %d", lux, presence_data.presence, presence_data.range);
 
     vTaskDelay(pdMS_TO_TICKS(250));
   }
