@@ -9,6 +9,8 @@
 #include "display/esp32_s3.h"
 #include "ui/ui.h"
 
+#include "wifi_logging.h"
+
 static const char* TAG = "MAIN";
 
 extern SemaphoreHandle_t lvgl_mux;
@@ -20,12 +22,14 @@ extern "C" void app_main(void)
     init_wifi();
     init_display();
 
-    ESP_LOGI(TAG, "Start LVGL");
+    init_wifi_logging();
+
 
     xSemaphoreTakeRecursive(lvgl_mux, portMAX_DELAY);
     ui_init();
     xSemaphoreGiveRecursive(lvgl_mux);
 
+    ESP_LOGI(TAG, "Weather station started");
 
     // This lop handles LVGL operations in the background. It periodically calls
     // the LVGL timer handler to update the GUI.

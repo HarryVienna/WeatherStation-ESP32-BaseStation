@@ -1,0 +1,1 @@
+idf_component_register(SRCS "wifi_logging.c" INCLUDE_DIRS "include" REQUIRES "esp_wifi")

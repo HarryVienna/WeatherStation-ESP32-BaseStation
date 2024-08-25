@@ -12,12 +12,15 @@
 #include "esp_crt_bundle.h"
 #include "nvs/preferences.h"
 
+#include "cJSON.h"
+
 #include "gui/gui.h"
 
 #include "weather_task.h"
 #include "weather/open_meteo.h"
 
-#include "cJSON.h"
+#include "wifi_logging.h"
+
 
 static const char *WEATHER_URL_BASE = "https://api.open-meteo.com/v1/forecast";
 
@@ -109,6 +112,8 @@ void weather_task(void *pvParameter) {
     
     ESP_LOGI(TAG, "Start Weather task");
 
+    WIFI_LOGI(TAG, "Start Weather task"); 
+
     nvs_handle_t nvs_handle;
     nvs_open("weatherstation", NVS_READONLY, &nvs_handle);
 
@@ -140,7 +145,8 @@ void weather_task(void *pvParameter) {
 
     for (;;) {
         // ------- Current data -------
-        ESP_LOGI(TAG, "Call current weather API ");
+        ESP_LOGI(TAG, "Call current weather API");
+        WIFI_LOGI(TAG, "Call current weather API"); 
 
         sprintf(url, WEATHER_URL_CURRENT, latitude, longitude);
 
@@ -151,7 +157,12 @@ void weather_task(void *pvParameter) {
             ESP_LOGI(TAG, "HTTP GET Status = %d, content_length = %"PRId64,
                     esp_http_client_get_status_code(client),
                     esp_http_client_get_content_length(client));
-            //ESP_LOGI(TAG, "JSON %s", response.buffer);
+            WIFI_LOGI(TAG, "HTTP GET Status = %d, content_length = %"PRId64,
+                    esp_http_client_get_status_code(client),
+                    esp_http_client_get_content_length(client));   
+
+            ESP_LOGI(TAG, "JSON %s", response.buffer);                         
+            WIFI_LOGI(TAG, "JSON %s", response.buffer);
 
             // Parse JSON response
             cJSON *json = cJSON_Parse(response.buffer);
@@ -159,6 +170,7 @@ void weather_task(void *pvParameter) {
                 const char *error_ptr = cJSON_GetErrorPtr();
                 if (error_ptr != NULL) {
                     ESP_LOGE(TAG, "Error before: %s", error_ptr);
+                    WIFI_LOGE(TAG, "Error before: %s", error_ptr);
                 }
             }
             else {
@@ -188,13 +200,16 @@ void weather_task(void *pvParameter) {
 
         } else {
             ESP_LOGE(TAG, "HTTP GET request failed: %s", esp_err_to_name(err));
+            WIFI_LOGE(TAG, "HTTP GET request failed: %s", esp_err_to_name(err));
         }
 
         esp_http_client_close(client);
 
 
         // ------- Hourly data -------
-        ESP_LOGI(TAG, "Call hourly weather API ");
+        ESP_LOGI(TAG, "Call hourly weather API");
+        WIFI_LOGI(TAG, "Call hourly weather API"); 
+
 
         sprintf(url, WEATHER_URL_HOURLY, latitude, longitude);
 
@@ -205,7 +220,12 @@ void weather_task(void *pvParameter) {
             ESP_LOGI(TAG, "HTTP GET Status = %d, content_length = %"PRId64,
                     esp_http_client_get_status_code(client),
                     esp_http_client_get_content_length(client));
-            //ESP_LOGI(TAG, "JSON %s", response.buffer);
+            WIFI_LOGI(TAG, "HTTP GET Status = %d, content_length = %"PRId64,
+                    esp_http_client_get_status_code(client),
+                    esp_http_client_get_content_length(client)); 
+
+            ESP_LOGI(TAG, "JSON %s", response.buffer);                                
+            WIFI_LOGI(TAG, "JSON %s", response.buffer);
 
             // Parse JSON response
             cJSON *json = cJSON_Parse(response.buffer);
@@ -213,6 +233,7 @@ void weather_task(void *pvParameter) {
                 const char *error_ptr = cJSON_GetErrorPtr();
                 if (error_ptr != NULL) {
                     ESP_LOGE(TAG, "Error before: %s", error_ptr);
+                    WIFI_LOGE(TAG, "Error before: %s", error_ptr);
                 }
             }
             else {
@@ -267,12 +288,14 @@ void weather_task(void *pvParameter) {
 
         } else {
             ESP_LOGE(TAG, "HTTP GET request failed: %s", esp_err_to_name(err));
+            WIFI_LOGE(TAG, "HTTP GET request failed: %s", esp_err_to_name(err));
         }
 
         esp_http_client_close(client);
 
         // ------- Daily data -------
-        ESP_LOGI(TAG, "Call daily weather API ");
+        ESP_LOGI(TAG, "Call daily weather API");
+        WIFI_LOGI(TAG, "Call daily weather API"); 
 
         sprintf(url, WEATHER_URL_DAILY, latitude, longitude);
 
@@ -283,7 +306,12 @@ void weather_task(void *pvParameter) {
             ESP_LOGI(TAG, "HTTP GET Status = %d, content_length = %"PRId64,
                     esp_http_client_get_status_code(client),
                     esp_http_client_get_content_length(client));
-            //ESP_LOGI(TAG, "JSON %s", response.buffer);
+            WIFI_LOGI(TAG, "HTTP GET Status = %d, content_length = %"PRId64,
+                    esp_http_client_get_status_code(client),
+                    esp_http_client_get_content_length(client)); 
+
+            ESP_LOGI(TAG, "JSON %s", response.buffer);                                
+            WIFI_LOGI(TAG, "JSON %s", response.buffer);
 
             // Parse JSON response
             cJSON *json = cJSON_Parse(response.buffer);
@@ -291,6 +319,7 @@ void weather_task(void *pvParameter) {
                 const char *error_ptr = cJSON_GetErrorPtr();
                 if (error_ptr != NULL) {
                     ESP_LOGE(TAG, "Error before: %s", error_ptr);
+                    WIFI_LOGE(TAG, "Error before: %s", error_ptr);
                 }
             }
             else {
@@ -344,6 +373,7 @@ void weather_task(void *pvParameter) {
 
         } else {
             ESP_LOGE(TAG, "HTTP GET request failed: %s", esp_err_to_name(err));
+            WIFI_LOGE(TAG, "HTTP GET request failed: %s", esp_err_to_name(err));
         }
 
         esp_http_client_close(client);
