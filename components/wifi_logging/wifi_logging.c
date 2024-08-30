@@ -36,49 +36,69 @@ void wifi_log_message(const char *tag, esp_log_level_t level, const char *func, 
         return; // Filter out messages below the configured level
     }
 
+    // Estimate initial size for prefix and format
+    int initial_size = 256; // Arbitrary starting size
+    char *final_message = (char *)malloc(initial_size);
+
+
+    int prefix_len = snprintf(final_message, initial_size, "[%.20s][%.10s][%s:%d]: ", 
+                                tag, level_strings[level], func, line);
+
+    va_list args;
+    va_start(args, format);
+    int msg_len = vsnprintf(NULL, 0, format, args); // Get required size for formatted string
+    va_end(args);
+
+    // Resize buffer if needed
+    int total_len = prefix_len + msg_len + 2; // +1 for '\n', +1 for '\0'
+    final_message = (char *)realloc(final_message, total_len);
+    
+    va_start(args, format);
+    vsnprintf(final_message + prefix_len, msg_len + 1, format, args);
+    va_end(args);
+
+    // Append newline and null terminator
+    final_message[prefix_len + msg_len] = '\n';
+    final_message[prefix_len + msg_len + 1] = '\0';
+
+    wifi_send_message(final_message); // Send message
+
+    free(final_message); // Free allocated memory
+    
+    xSemaphoreGive(socket_mutex);
+
+}
+
+void wifi_send_message(const char* log_message) {
     if (xSemaphoreTake(socket_mutex, portMAX_DELAY) == pdTRUE) {
-        
-         // Estimate initial size for prefix and format
-        int initial_size = 256; // Arbitrary starting size
-        char *final_message = (char *)malloc(initial_size);
-
-
-        int prefix_len = snprintf(final_message, initial_size, "[%.20s][%.10s][%s:%d]: ", 
-                                  tag, level_strings[level], func, line);
-
-        va_list args;
-        va_start(args, format);
-        int msg_len = vsnprintf(NULL, 0, format, args); // Get required size for formatted string
-        va_end(args);
-
-        // Resize buffer if needed
-        int total_len = prefix_len + msg_len + 2; // +1 for '\n', +1 for '\0'
-        final_message = (char *)realloc(final_message, total_len);
-        
-        va_start(args, format);
-        vsnprintf(final_message + prefix_len, msg_len + 1, format, args);
-        va_end(args);
-
-        // Append newline and null terminator
-        final_message[prefix_len + msg_len] = '\n';
-        final_message[prefix_len + msg_len + 1] = '\0';
-        
         struct sockaddr_in dest_addr;
         dest_addr.sin_addr.s_addr = inet_addr(WIFI_LOGGING_SERVER_IP);
         dest_addr.sin_family = AF_INET; 
         dest_addr.sin_port = htons(WIFI_LOGGING_SERVER_PORT);
 
-        int err = sendto(udp_socket, final_message, strlen(final_message), 0, 
+        int err = sendto(udp_socket, log_message, strlen(log_message), 0, 
                          (struct sockaddr *)&dest_addr, sizeof(dest_addr));
         if (err < 0) {
             ESP_LOGE("WiFi Logging", "Error occurred during sending: errno %d", errno);
         }
 
-        free(final_message); // Free allocated memory
-        
         xSemaphoreGive(socket_mutex);
-
     } else {
         ESP_LOGE("WiFi Logging", "Failed to take mutex");
     }
+}
+
+int wifi_system_send_message(const char* fmt, va_list tag) {
+    int size = vsnprintf(NULL, 0, fmt, tag) + 1; // +1 for \0 terminator
+    char *print_buffer = (char*)malloc(size);
+
+	vsprintf(print_buffer, fmt, tag);
+
+	wifi_send_message(print_buffer);
+
+	int result = vprintf(fmt, tag);
+
+    free(print_buffer);
+
+    return result;
 }

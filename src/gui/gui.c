@@ -22,6 +22,8 @@
 #include "lvgl/lv_hourly_chart.h"
 #include "lvgl/lv_daily_chart.h"
 
+#include "wifi_logging.h"
+
 static const char* TAG = "GUI";
 
 extern SemaphoreHandle_t lvgl_mux;
@@ -939,6 +941,8 @@ void event_weatherstation_start(lv_event_t *e)
   wifi_start();
   esp_now_start();
   start_tasks();
+
+  esp_log_set_vprintf(wifi_system_send_message); // redirect logging to WIFI for debugging
 
 }
 
