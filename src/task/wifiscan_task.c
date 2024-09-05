@@ -23,9 +23,9 @@ extern SemaphoreHandle_t lvgl_mux;
 void wifiscan_task(void *pvParameter) {
     ESP_LOGI(TAG, "Start wifiscan_task");
 
-    xSemaphoreTakeRecursive(lvgl_mux, portMAX_DELAY);
+    xSemaphoreTake(lvgl_mux, portMAX_DELAY);
     disp_disable_scanbutton(true);
-    xSemaphoreGiveRecursive(lvgl_mux);
+    xSemaphoreGive(lvgl_mux);
 
     if (esp_wifi_start() != ESP_OK) {
         ESP_LOGE(TAG, "Failed to start wifi");     
@@ -69,10 +69,10 @@ void wifiscan_task(void *pvParameter) {
 
     ESP_ERROR_CHECK(esp_wifi_stop());
 
-    xSemaphoreTakeRecursive(lvgl_mux, portMAX_DELAY);
+    xSemaphoreTake(lvgl_mux, portMAX_DELAY);
     disp_wifi_networks(allNetworks);
     disp_disable_scanbutton(false);
-    xSemaphoreGiveRecursive(lvgl_mux);
+    xSemaphoreGive(lvgl_mux);
 
     vTaskDelete(NULL); // Delete the task when done
 }

@@ -22,8 +22,6 @@
 #include "lvgl/lv_hourly_chart.h"
 #include "lvgl/lv_daily_chart.h"
 
-#include "wifi_logging.h"
-
 static const char* TAG = "GUI";
 
 extern SemaphoreHandle_t lvgl_mux;
@@ -725,15 +723,15 @@ void set_labels() {
 
 void start_tasks()
 {
-
+ 
   xTaskCreatePinnedToCore(
-      clock_task,   /* Task function. */
-      "Clock Task", /* String with name of task. */
-      4096,         /* Stack size in bytes. */
-      NULL,         /* Parameter passed as input of the task */
-      1,            /* Priority of the task. */
-      NULL,         /* Task handle. */
-      1);           /* Clock task on core 0*/
+      clock_task,  
+      "Clock Task",
+      4096,  
+      NULL,   
+      1,     
+      NULL, 
+      1);  
 
   xTaskCreatePinnedToCore(
       sensor_sen55_task,    
@@ -941,8 +939,5 @@ void event_weatherstation_start(lv_event_t *e)
   wifi_start();
   esp_now_start();
   start_tasks();
-
-  esp_log_set_vprintf(wifi_system_send_message); // redirect logging to WIFI for debugging
-
 }
 

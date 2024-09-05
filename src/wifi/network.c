@@ -155,9 +155,9 @@ void on_data_recv(const esp_now_recv_info_t *recv_info, const uint8_t *incoming_
         localtime_r(&now, &timeinfo);
         strftime(date_time, sizeof(date_time),"%H:%M", &timeinfo);
 
-        xSemaphoreTakeRecursive(lvgl_mux, portMAX_DELAY);
+        xSemaphoreTake(lvgl_mux, portMAX_DELAY);
         disp_sensor_data(msg.sensor_nr, msg.temperature, msg.humidity, msg.pressure, msg.voltage, date_time);
-        xSemaphoreGiveRecursive(lvgl_mux);  
+        xSemaphoreGive(lvgl_mux);  
 
         break;
 

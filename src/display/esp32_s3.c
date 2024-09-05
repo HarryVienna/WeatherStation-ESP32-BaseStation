@@ -240,7 +240,7 @@ void init_lvgl(esp_lcd_panel_handle_t panel_handle, esp_lcd_touch_handle_t touch
 
     ESP_LOGI(TAG, "Initialize LVGL library");
 
-    lvgl_mux = xSemaphoreCreateRecursiveMutex();
+    lvgl_mux = xSemaphoreCreateMutex();
 
     static lv_disp_draw_buf_t disp_buf; // contains internal graphic buffer(s) called draw buffer(s)
     static lv_disp_drv_t disp_drv;      // contains callback functions

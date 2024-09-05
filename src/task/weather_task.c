@@ -133,6 +133,7 @@ void weather_task(void *pvParameter) {
     esp_http_client_config_t config = {
         .event_handler = _http_event_handler,
         .url = WEATHER_URL_BASE,
+        .is_async = false,
         .crt_bundle_attach = esp_crt_bundle_attach,
         .user_data = &response, // Pass the response buffer to the event handler
         .disable_auto_redirect = true,
@@ -351,10 +352,11 @@ void weather_task(void *pvParameter) {
 
         esp_http_client_close(client);
 
-        xSemaphoreTakeRecursive(lvgl_mux, portMAX_DELAY);
+        xSemaphoreTake(lvgl_mux, portMAX_DELAY);
         disp_weather(&current_data, hourly_data, daily_data);
-        xSemaphoreGiveRecursive(lvgl_mux);    
+        xSemaphoreGive(lvgl_mux);    
 
         vTaskDelay(pdMS_TO_TICKS(1000 * 60 *15)); // Every 15 Minutes
+        //vTaskDelay(pdMS_TO_TICKS(1000)); // Every 15 Minutes
     }
 }

@@ -73,9 +73,9 @@ void sensor_scd41_task(void *pvParameter) {
         } else {
             ESP_LOGI(TAG, "CO2: %u   Temperature: %.1f m°C   Humidity: %.1f mRH", co2, temperature/1000.0f, humidity/1000.0f);
 
-            xSemaphoreTakeRecursive(lvgl_mux, portMAX_DELAY);
+            xSemaphoreTake(lvgl_mux, portMAX_DELAY);
             disp_scd4x(co2);
-            xSemaphoreGiveRecursive(lvgl_mux);
+            xSemaphoreGive(lvgl_mux);
         }
     }
 

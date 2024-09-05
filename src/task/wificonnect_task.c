@@ -27,18 +27,18 @@ void wificonnect_task(void *pvParameter) {
 
     ESP_LOGI(TAG, "Start wifiscan_task");
 
-    xSemaphoreTakeRecursive(lvgl_mux, portMAX_DELAY);
+    xSemaphoreTake(lvgl_mux, portMAX_DELAY);
     disp_disable_connectbutton(true);
-    xSemaphoreGiveRecursive(lvgl_mux);
+    xSemaphoreGive(lvgl_mux);
 
     local_wifi_sta_config_t *wifiParams = (local_wifi_sta_config_t *)pvParameter;
 
     bool connected = wifi_connect(wifiParams->ssid, wifiParams->password, false);
 
-    xSemaphoreTakeRecursive(lvgl_mux, portMAX_DELAY);
+    xSemaphoreTake(lvgl_mux, portMAX_DELAY);
     disp_connect_status(connected);
     disp_disable_connectbutton(false);
-    xSemaphoreGiveRecursive(lvgl_mux);
+    xSemaphoreGive(lvgl_mux);
 
     vTaskDelete(NULL); // Delete the task when done
 }

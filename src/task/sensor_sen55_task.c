@@ -153,9 +153,9 @@ void sensor_sen55_task(void *pvParameter) {
                 ESP_LOGI(TAG, "Nox index: %.1f", nox_index / 10.0f);
             }
 
-            xSemaphoreTakeRecursive(lvgl_mux, portMAX_DELAY);
+            xSemaphoreTake(lvgl_mux, portMAX_DELAY);
             disp_sen5x(ambient_temperature / 200.0f, ambient_humidity / 100.0f, mass_concentration_pm1p0 / 10.0f, mass_concentration_pm2p5 / 10.0f, mass_concentration_pm4p0 / 10.0f, mass_concentration_pm10p0 / 10.0f, voc_index / 10.0f, nox_index / 10.0f);
-            xSemaphoreGiveRecursive(lvgl_mux);
+            xSemaphoreGive(lvgl_mux);
         }
     }
 

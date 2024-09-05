@@ -43,9 +43,9 @@ void clock_task(void *pvParameter){
     strftime(str_ftime, sizeof(str_ftime), "%d.%m.%Y  %H:%M", &timeinfo);
     snprintf(date_time, sizeof(date_time), "%s %s", DAY_NAMES[timeinfo.tm_wday], str_ftime);
 
-    xSemaphoreTakeRecursive(lvgl_mux, portMAX_DELAY);
+    xSemaphoreTake(lvgl_mux, portMAX_DELAY);
     disp_date_time(date_time);
-    xSemaphoreGiveRecursive(lvgl_mux);
+    xSemaphoreGive(lvgl_mux);
 
     vTaskDelay(pdMS_TO_TICKS(1000)); // Sleep for 1 second
   }
