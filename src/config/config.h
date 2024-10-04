@@ -30,7 +30,7 @@ static const char* DAY_NAMES[7] = { "So", "Mo", "Di", "Mi" , "Do" , "Fr" , "Sa" 
 
 // PWM Configuration
 #define PWM_FREQ               200 
-#define PWM_RESOLUTION         LEDC_TIMER_8_BIT 
+#define PWM_RESOLUTION         LEDC_TIMER_10_BIT 
 #define LEDC_CHANNEL           LEDC_CHANNEL_0  
 #define LEDC_TIMER             LEDC_TIMER_0 
 #define LEDC_PIN_NUM_BK_LIGHT  GPIO_NUM_10

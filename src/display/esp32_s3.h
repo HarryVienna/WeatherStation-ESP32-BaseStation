@@ -16,7 +16,7 @@ void init_display(void);
 
 void init_backlight(void);
 
-void set_backlight_brightness(uint8_t brightness);
+void set_backlight_brightness(uint16_t brightness);
 
 void init_touch(esp_lcd_touch_handle_t *touch_handle);
 

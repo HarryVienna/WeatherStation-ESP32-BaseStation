@@ -638,7 +638,7 @@ void disp_weather(current_weather_data_t *current_weather, hourly_weather_data_t
 }
 
 
-void set_brightness(uint8_t brightness)
+void set_brightness(uint16_t brightness)
 {
   set_backlight_brightness(brightness);
 }

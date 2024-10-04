@@ -19,11 +19,6 @@
 #include "gui/gui.h"
 #include "config/config.h"
 
-// Pin 19 --> https://www.espressif.com/sites/default/files/documentation/esp32-s3_technical_reference_manual_en.pdf#subsection.39.3
-#define ADC_CHANNEL ADC_CHANNEL_8   
-#define ADC_UNIT ADC_UNIT_2
-#define ADC_ATTEN ADC_ATTEN_DB_12
-
 static const char* TAG = "brightness_task";
 
 /**
@@ -64,18 +59,18 @@ static const char* TAG = "brightness_task";
  *
  *
  */
-uint8_t map_brightness(uint16_t lux, bool presence) {
+uint16_t map_brightness(uint16_t lux, bool presence) {
 
-  float a = 42.33f;
+  float a = 170.33f;
   float b = 1.00f;
 
-  uint8_t brightness;
+  uint16_t brightness;
   
   if (lux == 0 || !presence) {
     brightness = 1;
   }
   else {
-    brightness = (uint8_t)(a * log10(lux) + b);
+    brightness = (uint16_t)(a * log10(lux) + b);
   }
    
   //ESP_LOGI(TAG, "                 Mapped value %f %d", brightness, (uint8_t)brightness); 
@@ -140,7 +135,7 @@ void brightness_task(void *pvParameter){
   // Hysteresis thresholds
   const uint8_t threshold = 10; 
 
-  uint8_t target_brightness, current_brightness;   
+  uint16_t target_brightness, current_brightness;   
   current_brightness = 127;
 
   for (;;) {
@@ -214,52 +209,4 @@ void brightness_task(void *pvParameter){
   }
 
 
-
-
-
-
-
-
-  static int adc_raw;
-
-  adc_oneshot_unit_handle_t adc_handle;
-  adc_oneshot_unit_init_cfg_t init_config = {
-      .unit_id = ADC_UNIT,
-      .ulp_mode = ADC_ULP_MODE_DISABLE,
-  };
-  ESP_ERROR_CHECK(adc_oneshot_new_unit(&init_config, &adc_handle));
-
-  adc_oneshot_chan_cfg_t config = {
-      .atten = ADC_ATTEN,
-      .bitwidth = ADC_BITWIDTH_DEFAULT,
-  };
-  ESP_ERROR_CHECK(adc_oneshot_config_channel(adc_handle, ADC_CHANNEL, &config));
-
-  adc_cali_handle_t adc_cali_chan_handle = NULL;
-
-  adc_cali_curve_fitting_config_t cali_config = {
-      .unit_id = ADC_UNIT,
-      .chan = ADC_CHANNEL,
-      .atten = ADC_ATTEN,
-      .bitwidth = ADC_BITWIDTH_DEFAULT,
-  };
-  ESP_ERROR_CHECK(adc_cali_create_scheme_curve_fitting(&cali_config, &adc_cali_chan_handle));
-
-  int brightness;
-
-  /*
-  2100  without LDR = total dark
-  
-  */
-
-  for (;;) {
-
-    ESP_ERROR_CHECK(adc_oneshot_read(adc_handle, ADC_CHANNEL, &adc_raw));
-    ESP_LOGI(TAG, "ADC%d Channel[%d] Raw Data: %d", ADC_UNIT + 1, ADC_CHANNEL, adc_raw);
-
-    ESP_ERROR_CHECK(adc_cali_raw_to_voltage(adc_cali_chan_handle, adc_raw, &brightness));
-    ESP_LOGI(TAG, "ADC%d Channel[%d] Cali Voltage: %d mV", ADC_UNIT + 1, ADC_CHANNEL, brightness);
-
-    vTaskDelay(pdMS_TO_TICKS(1000)); // Sleep for 1 second
-  }
 }
