@@ -21,6 +21,7 @@
 #include "gui.h"
 #include "lvgl/lv_hourly_chart.h"
 #include "lvgl/lv_daily_chart.h"
+#include "lvgl/lv_screenshot.h"
 
 static const char* TAG = "GUI";
 
@@ -551,7 +552,7 @@ void disp_sen5x(float ambientTemperature, float ambientHumidity, float massConce
 
 void disp_weather(current_weather_data_t *current_weather, hourly_weather_data_t *hourly_weather, daily_weather_data_t *daily_weather) {
 
-  // Daily data
+  // Current data
   char temp[8];
   char clouds[8];
   char uv_index[8];
@@ -609,9 +610,11 @@ void disp_weather(current_weather_data_t *current_weather, hourly_weather_data_t
   {
     hourly_data[i].dt = hourly_weather[i].time;
     hourly_data[i].temp = hourly_weather[i].temperature_2m;
+    hourly_data[i].dew = hourly_weather[i].dew_point_2m;
     hourly_data[i].rain = hourly_weather[i].rain + hourly_weather[i].showers;
     hourly_data[i].snow = hourly_weather[i].snowfall * 10.0f / 7.0f;  // See docu from open-meteo.com  snow -> water
-    hourly_data[i].pop = (hourly_weather[i].precipitation_probability * 75.0f / 100.0f + 25.0f) / 100.0f;  // Map 0-100 to 25-100 for better visualisation
+    hourly_data[i].pop = hourly_weather[i].precipitation_probability;
+    //hourly_data[i].pop = (hourly_weather[i].precipitation_probability * 80.0f / 100.0f + 20.0f) / 100.0f;  // Map 0-100 to 25-100 for better visualisation
     hourly_data[i].sun = hourly_weather[i].sunshine_duration / 3600.0f;
     //hourly_data[i].sun = hourly_weather[i].is_day ? (100.0f - source_data[i].cloud_cover) / 100.0f : 0;
   }
@@ -629,7 +632,7 @@ void disp_weather(current_weather_data_t *current_weather, hourly_weather_data_t
     daily_data[i].high_temp = daily_weather[i].temperature_2m_max;
     daily_data[i].rain = daily_weather[i].rain_sum + daily_weather[i].showers_sum;
     daily_data[i].snow = daily_weather[i].snowfall_sum * 10.0f / 7.0f;  // See docu from open-meteo.com  snow -> water
-    daily_data[i].pop = daily_weather[i].precipitation_probability_max / 100.0f;
+    daily_data[i].pop = daily_weather[i].precipitation_probability_max;
     daily_data[i].sun = daily_weather[i].sunshine_duration / daily_weather[i].daylight_duration;
   }
 
@@ -939,5 +942,6 @@ void event_weatherstation_start(lv_event_t *e)
   wifi_start();
   esp_now_start();
   start_tasks();
+
 }
 

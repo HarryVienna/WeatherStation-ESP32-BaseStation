@@ -15,6 +15,7 @@
 #define COLOR_BLUE 0x0000F4
 #define COLOR_PURPLE 0x302E97
 #define COLOR_PINK 0xEB8DFA
+#define COLOR_DARKPINK 0xFA00AC
 #define COLOR_DARKBLUE 0x00007F
 #define COLOR_GREY 0x2E2E2E
 #define COLOR_BLACK 0x000000
@@ -82,5 +83,12 @@ static const char* DAY_NAMES[7] = { "So", "Mo", "Di", "Mi" , "Do" , "Fr" , "Sa" 
 #define LVGL_TASK_DELAY_MS   10
 #define LVGL_TASK_STACK_SIZE (4 * 1024)
 #define LVGL_TASK_PRIORITY   2
+
+// Chart Widgets
+#define NUM_HOURS 48
+#define MAX_HOURLY_PRECIPITATION 5
+
+#define NUM_DAYS 7
+#define MAX_DAILY_PRECIPITATION 20
 
 #endif /* CONFIG_H */

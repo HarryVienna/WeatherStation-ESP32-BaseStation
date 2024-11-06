@@ -14,12 +14,12 @@
 
 #include "config/config.h"
 
-// #define CONFIG_DOUBLE_FB 1
+//#define CONFIG_DOUBLE_FB
 
-#if CONFIG_DOUBLE_FB
-#define LCD_NUM_FB             2
+#ifdef  CONFIG_DOUBLE_FB
+ #define LCD_NUM_FB             2
 #else
-#define LCD_NUM_FB             1
+ #define LCD_NUM_FB             1
 #endif
 
 static const char* TAG = "DISPLAY";

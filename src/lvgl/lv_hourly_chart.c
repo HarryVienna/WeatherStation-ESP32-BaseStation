@@ -10,10 +10,10 @@
 #include <math.h>
 
 #include "esp_log.h"
+#include "esp_heap_caps.h"
 
 #include "lv_hourly_chart.h"
 #include "lv_common.h"
-#include "../config/config.h"
 
 #include "misc/lv_assert.h"
 #include "draw/lv_draw.h"
@@ -108,6 +108,7 @@ void lv_hourly_chart_set_data(lv_obj_t * obj, const lv_hourly_data *data)
         if (data[i].temp > max_temp) { 
             max_temp = data[i].temp;
         }
+
         if (data[i].temp < min_temp) {
             min_temp = data[i].temp;
         }
@@ -126,7 +127,7 @@ void lv_hourly_chart_set_data(lv_obj_t * obj, const lv_hourly_data *data)
 
     chart->has_data = true;
 
-    lv_hourly_chart_refresh(obj);
+    //lv_hourly_chart_refresh(obj);
 }
 
 
@@ -466,6 +467,7 @@ static void draw_hourly_clouds(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
 }
 
 
+
 static void draw_hourly_temp(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
 {
     lv_hourly_chart_t * chart  = (lv_hourly_chart_t *)obj;
@@ -490,7 +492,7 @@ static void draw_hourly_temp(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
     lv_draw_line_dsc_t line_dsc;
     lv_draw_line_dsc_init(&line_dsc);
     lv_obj_init_draw_line_dsc(obj, LV_PART_ITEMS, &line_dsc);
-    line_dsc.width = 3;
+    line_dsc.width = 4;
     line_dsc.round_start = 1;
     line_dsc.round_end = 1;
     line_dsc.raw_end = 0;
@@ -504,21 +506,30 @@ static void draw_hourly_temp(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
     part_draw_dsc.line_dsc = &line_dsc;
 
     lv_temp_t hourly_temps[NUM_HOURS];    // 0 .. NUM_HOURS-1
+    lv_temp_t hourly_dews[NUM_HOURS];
     for(uint32_t i = 0; i < NUM_HOURS; i++) { 
         hourly_temps[i].x = i;
         hourly_temps[i].y = chart->data_array[i].temp;
+
+        hourly_dews[i].x = i;
+        hourly_dews[i].y = chart->data_array[i].dew;
         //LV_LOG_WARN("map %f   %f",hourly_temps[i].x, hourly_temps[i].y);
     }
 
-    lv_coord_t hourly_values[w];          // 0 .. w-1
+    // Dynamische Speicherallokation für die Arrays
+    lv_coord_t *hourly_temp_values = (lv_coord_t *)heap_caps_malloc(w * sizeof(lv_coord_t), MALLOC_CAP_32BIT | MALLOC_CAP_SPIRAM);
+    lv_color_t *hourly_dew_values = (lv_color_t *)heap_caps_malloc(w * sizeof(lv_color_t), MALLOC_CAP_32BIT | MALLOC_CAP_SPIRAM);
+
     for(uint32_t i = 0; i < w; i++) { 
         //LV_LOG_WARN("i %d",i );
 
         // map current i to an x in hourly_temps
         float x = (float)i * (NUM_HOURS - 1) / (w - 1);
         float y = cubicInterpolation(hourly_temps, NUM_HOURS, x);
+        float dew = cubicInterpolation(hourly_dews, NUM_HOURS, x);
 
-        hourly_values[i] = lv_map_float(y, min, max, 0, h);
+        hourly_temp_values[i] = lv_map_float(y, min, max, 0, h);
+        hourly_dew_values[i] = map_dewpoint_to_color(dew);
 
         //  LV_LOG_WARN("map %d   %f   %f   %d  ", i, x, y, hourly_values[i]);
 
@@ -527,21 +538,25 @@ static void draw_hourly_temp(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
     for(uint32_t i = 0; i < w - 1; i++) { 
 
         p1.x = x_ofs + i;
-        p1.y = y_ofs + h - hourly_values[i];
+        p1.y = y_ofs + h - hourly_temp_values[i];
 
         p2.x = x_ofs + i + 1;
-        p2.y = y_ofs + h - hourly_values[i + 1];
+        p2.y = y_ofs + h - hourly_temp_values[i + 1];
 
         part_draw_dsc.p1 = &p1;
         part_draw_dsc.p2 = &p2;
+
+        line_dsc.color = hourly_dew_values[i];
 
         lv_event_send(obj, LV_EVENT_DRAW_PART_BEGIN, &part_draw_dsc);
         lv_draw_line(draw_ctx, &line_dsc, &p1, &p2);
         lv_event_send(obj, LV_EVENT_DRAW_PART_END, &part_draw_dsc);        
     }
+
+    // Speicher freigeben
+    heap_caps_free(hourly_temp_values);
+    heap_caps_free(hourly_dew_values);
 }
-
-
 
 static void draw_hourly_precipitation(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
 {
@@ -567,13 +582,11 @@ static void draw_hourly_precipitation(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
     lv_draw_rect_dsc_init(&col_dsc);
     lv_obj_init_draw_rect_dsc(obj, LV_PART_ITEMS, &col_dsc);
 
-
     lv_obj_draw_part_dsc_t part_draw_dsc;
     lv_obj_draw_dsc_init(&part_draw_dsc, draw_ctx);
     part_draw_dsc.class_p = MY_CLASS;
     part_draw_dsc.type = LV_HOURLY_CHART_DRAW_PART_PRECIPITATION;
     part_draw_dsc.part = LV_PART_ITEMS;
-
 
     for(uint32_t i = 0; i < NUM_HOURS; i++) { 
         p1.x = x_ofs + (int32_t)(w * i / NUM_HOURS) + pad_col;
@@ -581,6 +594,7 @@ static void draw_hourly_precipitation(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
 
         float rain = chart->data_array[i].rain;
         float snow = chart->data_array[i].snow;
+        uint8_t pop = chart->data_array[i].pop;
 
         if (rain + snow > MAX_HOURLY_PRECIPITATION) {
             float factor = MAX_HOURLY_PRECIPITATION / (rain + snow);
@@ -590,7 +604,6 @@ static void draw_hourly_precipitation(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
 
         int32_t rain_value = lv_map_float(rain, 0, MAX_HOURLY_PRECIPITATION, 0, h);
         int32_t snow_value = lv_map_float(snow, 0, MAX_HOURLY_PRECIPITATION, 0, h);
-
 
         // Rain
         if (rain_value > 0) {
@@ -607,12 +620,15 @@ static void draw_hourly_precipitation(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
             part_draw_dsc.rect_dsc = &col_dsc;
 
             lv_event_send(obj, LV_EVENT_DRAW_PART_BEGIN, &part_draw_dsc);
+
             col_dsc.bg_color = lv_color_hex(COLOR_WHITE);
             col_dsc.bg_opa = LV_OPA_100;
             lv_draw_rect(draw_ctx, &col_dsc, &col_area);
+
             col_dsc.bg_color = lv_color_hex(COLOR_BLUE);
-            col_dsc.bg_opa = chart->data_array[i].pop * 255;
+            col_dsc.bg_opa = map_value_to_opacity(pop);
             lv_draw_rect(draw_ctx, &col_dsc, &col_area);
+
             lv_event_send(obj, LV_EVENT_DRAW_PART_END, &part_draw_dsc);
         }
 
@@ -631,12 +647,15 @@ static void draw_hourly_precipitation(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
             part_draw_dsc.rect_dsc = &col_dsc;
 
             lv_event_send(obj, LV_EVENT_DRAW_PART_BEGIN, &part_draw_dsc);
+
             col_dsc.bg_color = lv_color_hex(COLOR_WHITE);
             col_dsc.bg_opa = LV_OPA_100;
             lv_draw_rect(draw_ctx, &col_dsc, &col_area);
+
             col_dsc.bg_color = lv_color_hex(COLOR_PINK);
-            col_dsc.bg_opa = chart->data_array[i].pop * 255;
+            col_dsc.bg_opa =  map_value_to_opacity(pop);
             lv_draw_rect(draw_ctx, &col_dsc, &col_area);
+
             lv_event_send(obj, LV_EVENT_DRAW_PART_END, &part_draw_dsc);
         }
     }

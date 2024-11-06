@@ -14,6 +14,8 @@
 
 #include "cJSON.h"
 
+#include "../config/config.h"
+
 #include "gui/gui.h"
 
 #include "weather_task.h"
@@ -23,27 +25,32 @@
 static const char *WEATHER_URL_BASE = "http://api.open-meteo.com/v1/forecast";
 
 static const char *WEATHER_URL_CURRENT = 
-        "http://api.open-meteo.com/v1/forecast?"
-        "latitude=%s&longitude=%s&"
-        "current=temperature_2m,relative_humidity_2m,apparent_temperature,"
-        "is_day,weather_code,cloud_cover,wind_speed_10m,wind_direction_10m,wind_gusts_10m,uv_index&"
-        "timeformat=unixtime&timezone=auto";
+        // "http://api.open-meteo.com/v1/forecast?"
+        // "latitude=%s&longitude=%s&"
+        // "current=temperature_2m,dew_point_2m,relative_humidity_2m,apparent_temperature,"
+        // "is_day,weather_code,cloud_cover,wind_speed_10m,wind_direction_10m,wind_gusts_10m,uv_index&"
+        // "timeformat=unixtime&timezone=auto";
+        "http://haraldkreuzer.net/current.json";
+
 
 static const char *WEATHER_URL_HOURLY = 
-        "http://api.open-meteo.com/v1/forecast?"
-        "latitude=%s&longitude=%s&"
-        "hourly=temperature_2m,precipitation_probability,rain,showers,snowfall,"
-        "wind_speed_10m,wind_gusts_10m,sunshine_duration,cloud_cover,is_day&"
-        "timeformat=unixtime&timezone=auto&forecast_days=3";
+        // "http://api.open-meteo.com/v1/forecast?"
+        // "latitude=%s&longitude=%s&"
+        // "hourly=temperature_2m,dew_point_2m,precipitation_probability,rain,showers,snowfall,"
+        // "wind_speed_10m,wind_gusts_10m,sunshine_duration,cloud_cover,is_day&"
+        // "timeformat=unixtime&timezone=auto&forecast_days=3";
+        "http://haraldkreuzer.net/hourly.json";
 
 static const char *WEATHER_URL_DAILY = 
-        "http://api.open-meteo.com/v1/forecast?"
-        "latitude=%s&longitude=%s&"
-        "daily=temperature_2m_max,temperature_2m_min,"
-        "daylight_duration,sunshine_duration,"
-        "rain_sum,showers_sum,snowfall_sum,precipitation_probability_max,"
-        "wind_speed_10m_max,wind_gusts_10m_max,sunrise,sunset&"
-        "timeformat=unixtime&timezone=auto";
+        // "http://api.open-meteo.com/v1/forecast?"
+        // "latitude=%s&longitude=%s&"
+        // "daily=temperature_2m_max,temperature_2m_min,"
+        // "daylight_duration,sunshine_duration,"
+        // "rain_sum,showers_sum,snowfall_sum,precipitation_probability_max,"
+        // "wind_speed_10m_max,wind_gusts_10m_max,sunrise,sunset&"
+        // "timeformat=unixtime&timezone=auto";
+        "http://haraldkreuzer.net/daily.json";
+
 
 static const char* TAG = "weather_task";
 
@@ -155,7 +162,7 @@ void weather_task(void *pvParameter) {
                     esp_http_client_get_status_code(client),
                     esp_http_client_get_content_length(client));
 
-            ESP_LOGI(TAG, "JSON %s", response.buffer);                         
+            //ESP_LOGI(TAG, "JSON %s", response.buffer);                         
 
             // Parse JSON response
             cJSON *json = cJSON_Parse(response.buffer);
@@ -169,6 +176,7 @@ void weather_task(void *pvParameter) {
                 cJSON *current = cJSON_GetObjectItem(json, "current");
 
                 current_data.temperature_2m = cJSON_GetObjectItem(current, "temperature_2m")->valuedouble;
+                current_data.dew_point_2m = cJSON_GetObjectItem(current, "dew_point_2m")->valuedouble;
                 current_data.relative_humidity_2m = cJSON_GetObjectItem(current, "relative_humidity_2m")->valueint;
                 current_data.apparent_temperature = cJSON_GetObjectItem(current, "apparent_temperature")->valuedouble;
                 current_data.is_day = cJSON_GetObjectItem(current, "is_day")->valueint;
@@ -210,7 +218,7 @@ void weather_task(void *pvParameter) {
                     esp_http_client_get_status_code(client),
                     esp_http_client_get_content_length(client));
 
-            ESP_LOGI(TAG, "JSON %s", response.buffer);                                
+            //ESP_LOGI(TAG, "JSON %s", response.buffer);                                
 
             // Parse JSON response
             cJSON *json = cJSON_Parse(response.buffer);
@@ -232,6 +240,7 @@ void weather_task(void *pvParameter) {
 
                 cJSON *time = cJSON_GetObjectItem(hourly, "time");
                 cJSON *temperature_2m = cJSON_GetObjectItem(hourly, "temperature_2m");
+                cJSON *dew_point_2m = cJSON_GetObjectItem(hourly, "dew_point_2m");
                 cJSON *precipitation_probability = cJSON_GetObjectItem(hourly, "precipitation_probability");
                 cJSON *rain = cJSON_GetObjectItem(hourly, "rain");
                 cJSON *showers = cJSON_GetObjectItem(hourly, "showers");
@@ -243,12 +252,13 @@ void weather_task(void *pvParameter) {
                 cJSON *is_day = cJSON_GetObjectItem(hourly, "is_day");
 
                 // Iterate through the "hourly" data array
-                for (int i = 0; i < 48; i++) {
+                for (int i = 0; i < NUM_HOURS; i++) {
 
                     time_t unixTimestamp = (time_t)cJSON_GetArrayItem(time, i + currentHour)->valueint;
                     localtime_r(&unixTimestamp, &hourly_data[i].time); 
                     hourly_data[i].temperature_2m = cJSON_GetArrayItem(temperature_2m, i + currentHour)->valuedouble;
-                    hourly_data[i].precipitation_probability = cJSON_GetArrayItem(precipitation_probability, i + currentHour)->valuedouble;
+                    hourly_data[i].dew_point_2m = cJSON_GetArrayItem(dew_point_2m, i + currentHour)->valuedouble;
+                    hourly_data[i].precipitation_probability = cJSON_GetArrayItem(precipitation_probability, i + currentHour)->valueint;                    
                     hourly_data[i].rain = cJSON_GetArrayItem(rain, i + currentHour)->valuedouble;
                     hourly_data[i].showers = cJSON_GetArrayItem(showers, i + currentHour)->valuedouble;
                     hourly_data[i].snowfall = cJSON_GetArrayItem(snowfall, i + currentHour)->valuedouble;
@@ -288,7 +298,7 @@ void weather_task(void *pvParameter) {
                     esp_http_client_get_status_code(client),
                     esp_http_client_get_content_length(client));
 
-            ESP_LOGI(TAG, "JSON %s", response.buffer);                                
+            //ESP_LOGI(TAG, "JSON %s", response.buffer);                                
 
             // Parse JSON response
             cJSON *json = cJSON_Parse(response.buffer);
@@ -316,7 +326,7 @@ void weather_task(void *pvParameter) {
                 cJSON *sunset = cJSON_GetObjectItem(daily, "sunset");
 
                 // Iterate through the "daily" data array
-                for (int i = 0; i < 7; i++) {
+                for (int i = 0; i < NUM_DAYS; i++) {
 
                     time_t timeTimestamp = (time_t)cJSON_GetArrayItem(time, i)->valueint;
                     localtime_r(&timeTimestamp, &daily_data[i].time); 
@@ -327,7 +337,7 @@ void weather_task(void *pvParameter) {
                     daily_data[i].rain_sum = cJSON_GetArrayItem(rain_sum, i)->valuedouble;
                     daily_data[i].showers_sum = cJSON_GetArrayItem(showers_sum, i)->valuedouble;
                     daily_data[i].snowfall_sum = cJSON_GetArrayItem(snowfall_sum, i)->valuedouble;
-                    daily_data[i].precipitation_probability_max = cJSON_GetArrayItem(precipitation_probability_max, i)->valuedouble;
+                    daily_data[i].precipitation_probability_max = cJSON_GetArrayItem(precipitation_probability_max, i)->valueint;
                     daily_data[i].wind_speed_10m_max = cJSON_GetArrayItem(wind_speed_10m_max, i)->valuedouble;
                     daily_data[i].wind_gusts_10m_max = cJSON_GetArrayItem(wind_gusts_10m_max, i)->valuedouble;
                     time_t sunriseTimestamp = (time_t)cJSON_GetArrayItem(sunrise, i)->valueint;

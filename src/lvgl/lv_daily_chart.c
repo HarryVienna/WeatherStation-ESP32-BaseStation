@@ -13,7 +13,6 @@
 
 #include "lv_daily_chart.h"
 #include "lv_common.h"
-#include "../config/config.h"
 
 #include "misc/lv_assert.h"
 #include "draw/lv_draw.h"
@@ -446,7 +445,7 @@ static void draw_daily_temp(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
     lv_draw_line_dsc_t line_dsc;
     lv_draw_line_dsc_init(&line_dsc);
     lv_obj_init_draw_line_dsc(obj, LV_PART_ITEMS, &line_dsc);
-    line_dsc.width = 4;
+    line_dsc.width = 5;
     line_dsc.round_start = 0;
     line_dsc.round_end = 0;
     line_dsc.raw_end = 0;
@@ -493,8 +492,6 @@ static void draw_daily_temp(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
     }
 }
 
-
-
 static void draw_daily_precipitation(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
 {
     lv_daily_chart_t * chart  = (lv_daily_chart_t *)obj;
@@ -533,6 +530,7 @@ static void draw_daily_precipitation(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
 
         float rain = chart->data_array[i].rain;
         float snow = chart->data_array[i].snow;
+        uint8_t pop = chart->data_array[i].pop;
 
         if (rain + snow > MAX_DAILY_PRECIPITATION) {
             float factor = MAX_DAILY_PRECIPITATION / (rain + snow);
@@ -563,7 +561,7 @@ static void draw_daily_precipitation(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
             col_dsc.bg_opa = LV_OPA_100;
             lv_draw_rect(draw_ctx, &col_dsc, &col_area);
             col_dsc.bg_color = lv_color_hex(COLOR_BLUE);
-            col_dsc.bg_opa = chart->data_array[i].pop * 255;
+            col_dsc.bg_opa = map_value_to_opacity(pop);
             lv_draw_rect(draw_ctx, &col_dsc, &col_area);
             lv_event_send(obj, LV_EVENT_DRAW_PART_END, &part_draw_dsc);
         }
@@ -587,7 +585,7 @@ static void draw_daily_precipitation(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
             col_dsc.bg_opa = LV_OPA_100;
             lv_draw_rect(draw_ctx, &col_dsc, &col_area);
             col_dsc.bg_color = lv_color_hex(COLOR_PINK);
-            col_dsc.bg_opa = chart->data_array[i].pop * 255;
+            col_dsc.bg_opa = map_value_to_opacity(pop);
             lv_draw_rect(draw_ctx, &col_dsc, &col_area);
             lv_event_send(obj, LV_EVENT_DRAW_PART_END, &part_draw_dsc);
         }

@@ -8,8 +8,9 @@ extern "C" {
 #include <time.h>
 
 typedef struct {
-    double temperature_2m;          // Temperature at 2 meters in °C
-    int relative_humidity_2m;       // Relative humidity at 2 meters in %
+    double temperature_2m;          // Air temperature at 2 meters above ground
+    double dew_point_2m;            // Dew point temperature at 2 meters above ground
+    int relative_humidity_2m;       // Relative humidity at 2 meters above ground
     double apparent_temperature;    // Apparent temperature in °C
     int is_day;                     // Day indicator (1 = day, 0 = night)
     int weather_code;               // Weather code (WMO code)
@@ -21,17 +22,18 @@ typedef struct {
 } current_weather_data_t;
 
 typedef struct {
-    struct tm time;           // Store the time in a struct tm
-    double temperature_2m;    // Temperature in °C
+    struct tm time;                   // Store the time in a struct tm
+    double temperature_2m;            // Air temperature at 2 meters above ground
+    double dew_point_2m;              // Dew point temperature at 2 meters above ground
     double precipitation_probability; // Precipitation probability in %
-    double rain;             // Rain amount in mm
-    double showers;          // Shower amount in mm
-    double snowfall;         // Snowfall amount in cm
-    double wind_speed_10m;   // Wind speed in km/h
-    double wind_gusts_10m;   // Wind gusts in km/h
-    double sunshine_duration; // Sunshine duration in seconds
-    double cloud_cover;      // Total cloud cover
-    bool is_day;             // Boolean to indicate if it's day or night
+    double rain;                      // Rain amount in mm
+    double showers;                   // Shower amount in mm
+    double snowfall;                  // Snowfall amount in cm
+    double wind_speed_10m;            // Wind speed in km/h
+    double wind_gusts_10m;            // Wind gusts in km/h
+    double sunshine_duration;         // Sunshine duration in seconds
+    double cloud_cover;               // Total cloud cover
+    bool is_day;                      // Boolean to indicate if it's day or night
 } hourly_weather_data_t;
 
 typedef struct {

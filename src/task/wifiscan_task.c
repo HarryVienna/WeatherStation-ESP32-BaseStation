@@ -55,14 +55,18 @@ void wifiscan_task(void *pvParameter) {
 
     // Print scanned networks
     for (uint16_t i = 0; i < ap_count; i++) {
-        char item[128]; // Assuming a maximum of 128 characters per network item
-        snprintf(item, sizeof(item), "%s (%d) %s", (const char *)ap_records[i].ssid, ap_records[i].rssi, (ap_records[i].authmode == WIFI_AUTH_OPEN) ? "" : "*");
-        ESP_LOGI(TAG, "%s", item);
+        // Check if the SSID is not empty
+        if (strlen((const char *)ap_records[i].ssid) > 0) {
+             char item[128]; // Assuming a maximum of 128 characters per network item
+            snprintf(item, sizeof(item), "%s (%d) %s", (const char *)ap_records[i].ssid, ap_records[i].rssi, (ap_records[i].authmode == WIFI_AUTH_OPEN) ? "" : "*");
+            ESP_LOGI(TAG, "%s", item);
 
-        strlcat(allNetworks, (const char *)ap_records[i].ssid, sizeof(allNetworks));
-        if (i != ap_count - 1) {
-            strlcat(allNetworks, "\n", sizeof(allNetworks)); // Add newline character except for the last SSID
+            strlcat(allNetworks, (const char *)ap_records[i].ssid, sizeof(allNetworks));
+            if (i != ap_count - 1) {
+                strlcat(allNetworks, "\n", sizeof(allNetworks)); // Add newline character except for the last SSID
+            }
         }
+
     }
 
     free(ap_records);

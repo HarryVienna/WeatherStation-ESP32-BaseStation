@@ -10,12 +10,12 @@
 extern "C" {
 #endif
 
-#define NUM_HOURS 48
-#define MAX_HOURLY_PRECIPITATION 5
+
 
 /*********************
  *      INCLUDES
  *********************/
+#include "../config/config.h"
 #include "lv_conf_internal.h"
 #include "core/lv_obj.h"
 #include <time.h>
@@ -33,9 +33,10 @@ extern "C" {
 typedef struct {
     struct tm dt;
     double temp;
+    double dew;
     double rain;
     double snow;
-    double pop;
+    uint8_t pop;
     double sun;
 } lv_hourly_data;
 

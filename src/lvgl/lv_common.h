@@ -14,6 +14,7 @@ extern "C" {
  *      INCLUDES
  *********************/
 #include "lv_conf_internal.h"
+#include "core/lv_obj.h"
 #include <stdint.h>
 
 
@@ -43,6 +44,10 @@ typedef struct {
 int32_t lv_map_float(float x, int32_t min_in, int32_t max_in, int32_t min_out, int32_t max_out);
 
 float cubicInterpolation(lv_temp_t points[], int numPoints, float x);
+
+lv_color_t map_dewpoint_to_color(float value);
+
+lv_opa_t map_value_to_opacity(uint8_t value);
 
 #ifdef __cplusplus
 } /*extern "C"*/

@@ -9,6 +9,8 @@
 #include "display/esp32_s3.h"
 #include "ui/ui.h"
 
+#include "lvgl/lv_screenshot.h"
+
 static const char* TAG = "MAIN";
 
 extern SemaphoreHandle_t lvgl_mux;
@@ -19,12 +21,16 @@ extern "C" void app_main(void)
 
     init_wifi();
     init_display();
-
+   
     xSemaphoreTake(lvgl_mux, portMAX_DELAY);
     ui_init();
     xSemaphoreGive(lvgl_mux);
 
     ESP_LOGI(TAG, "Weather station started");
+
+    // Uncomment if you want to make automatic screenshots
+    // wifi_connect("xxx", "xxx", false);
+    // start_screenshot(60, 10);
 
     // This lop handles LVGL operations in the background. It periodically calls
     // the LVGL timer handler to update the GUI.

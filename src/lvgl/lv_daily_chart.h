@@ -10,12 +10,11 @@
 extern "C" {
 #endif
 
-#define NUM_DAYS 7
-#define MAX_DAILY_PRECIPITATION 20
 
 /*********************
  *      INCLUDES
  *********************/
+#include "../config/config.h"
 #include "lv_conf_internal.h"
 #include "core/lv_obj.h"
 #include <time.h>
@@ -36,7 +35,7 @@ typedef struct {
     double high_temp;
     double rain;
     double snow;
-    double pop;
+    uint8_t pop;
     double sun;
 } lv_daily_data;
 

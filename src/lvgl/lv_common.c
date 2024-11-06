@@ -8,6 +8,8 @@
  *********************/
 #include "lv_common.h"
 
+#include "../config/config.h"
+
 /*********************
  *      DEFINES
  *********************/
@@ -106,6 +108,59 @@ float cubicInterpolation(lv_temp_t points[], int numPoints, float x) {
 
     float interpolatedY = a * y0 + b * m0 + c * y1 + d * m1;
     return interpolatedY;
+}
+
+lv_color_t map_dewpoint_to_color(float value) {
+
+    // Definiere die Farbwerte
+    lv_color_t colors[] = {
+        lv_color_hex(COLOR_BLUE),    // <= 12
+        lv_color_hex(COLOR_ORANGE),  // ~ 14
+        lv_color_hex(COLOR_RED)
+    };
+    int num_colors = sizeof(colors) / sizeof(colors[0]);
+
+    float min_dew = 13.0;
+    float max_dew = 18.0;
+
+    if (value <= min_dew) {
+        return colors[0];
+    } else if (value >= max_dew) {
+        return colors[num_colors - 1];
+    } else {
+        // Berechne den Index des Arrays für Werte zwischen `min` und `max`
+        float scale = (value - min_dew) / (max_dew - min_dew);
+        int index = (int)(scale * (num_colors - 1));
+
+        return colors[index];
+    }
+}
+
+lv_opa_t map_value_to_opacity(uint8_t value) {
+
+    if (value <= 1) {
+        return LV_OPA_0;
+    } else if (value <= 2) {
+        return LV_OPA_10;
+    } else if (value <= 5) {
+        return LV_OPA_20;
+    } else if (value <= 15) {
+        return LV_OPA_40;
+    } else if (value <= 25) {
+        return LV_OPA_10;
+    } else if (value <= 35) {
+        return LV_OPA_50;
+    } else if (value <= 45) {
+        return LV_OPA_60;
+    } else if (value <= 55) {
+        return LV_OPA_70;
+    } else if (value <= 60) {
+        return LV_OPA_80;
+    } else if (value <= 85) {
+        return LV_OPA_90;
+    } else {
+        return LV_OPA_100;
+    }
 }
 
 /**********************
