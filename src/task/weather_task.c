@@ -25,31 +25,28 @@
 static const char *WEATHER_URL_BASE = "http://api.open-meteo.com/v1/forecast";
 
 static const char *WEATHER_URL_CURRENT = 
-        // "http://api.open-meteo.com/v1/forecast?"
-        // "latitude=%s&longitude=%s&"
-        // "current=temperature_2m,dew_point_2m,relative_humidity_2m,apparent_temperature,"
-        // "is_day,weather_code,cloud_cover,wind_speed_10m,wind_direction_10m,wind_gusts_10m,uv_index&"
-        // "timeformat=unixtime&timezone=auto";
-        "http://haraldkreuzer.net/current.json";
+        "http://api.open-meteo.com/v1/forecast?"
+        "latitude=%s&longitude=%s&"
+        "current=temperature_2m,dew_point_2m,relative_humidity_2m,apparent_temperature,"
+        "is_day,weather_code,cloud_cover,wind_speed_10m,wind_direction_10m,wind_gusts_10m,uv_index&"
+        "timeformat=unixtime&timezone=auto";
 
 
 static const char *WEATHER_URL_HOURLY = 
-        // "http://api.open-meteo.com/v1/forecast?"
-        // "latitude=%s&longitude=%s&"
-        // "hourly=temperature_2m,dew_point_2m,precipitation_probability,rain,showers,snowfall,"
-        // "wind_speed_10m,wind_gusts_10m,sunshine_duration,cloud_cover,is_day&"
-        // "timeformat=unixtime&timezone=auto&forecast_days=3";
-        "http://haraldkreuzer.net/hourly.json";
+        "http://api.open-meteo.com/v1/forecast?"
+        "latitude=%s&longitude=%s&"
+        "hourly=temperature_2m,dew_point_2m,precipitation_probability,rain,showers,snowfall,"
+        "wind_speed_10m,wind_gusts_10m,sunshine_duration,cloud_cover,is_day&"
+        "timeformat=unixtime&timezone=auto&forecast_days=3";
 
 static const char *WEATHER_URL_DAILY = 
-        // "http://api.open-meteo.com/v1/forecast?"
-        // "latitude=%s&longitude=%s&"
-        // "daily=temperature_2m_max,temperature_2m_min,"
-        // "daylight_duration,sunshine_duration,"
-        // "rain_sum,showers_sum,snowfall_sum,precipitation_probability_max,"
-        // "wind_speed_10m_max,wind_gusts_10m_max,sunrise,sunset&"
-        // "timeformat=unixtime&timezone=auto";
-        "http://haraldkreuzer.net/daily.json";
+        "http://api.open-meteo.com/v1/forecast?"
+        "latitude=%s&longitude=%s&"
+        "daily=temperature_2m_max,temperature_2m_min,"
+        "daylight_duration,sunshine_duration,"
+        "rain_sum,showers_sum,snowfall_sum,precipitation_probability_max,"
+        "wind_speed_10m_max,wind_gusts_10m_max,sunrise,sunset&"
+        "timeformat=unixtime&timezone=auto";
 
 
 static const char* TAG = "weather_task";
