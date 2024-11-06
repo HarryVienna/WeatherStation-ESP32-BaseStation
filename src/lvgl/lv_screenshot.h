@@ -19,7 +19,7 @@ typedef struct {
     uint16_t reserved1;     // Reserved; must be zero
     uint16_t reserved2;     // Reserved; must be zero
     uint32_t offset_data;    // Offset from beginning of file to the image data
-} __attribute__((packed)) bitmap_fileheader;
+} __attribute__((packed)) bitmap_fileheader_t;
 
 typedef struct {
     uint32_t size;           // Size of this header (40 bytes)
@@ -33,7 +33,7 @@ typedef struct {
     int32_t  y_pels_per_meter; // Vertical resolution in pixels per meter
     uint32_t clr_used;       // Number of colors in the color palette
     uint32_t clr_important;  // Number of important colors used
-} __attribute__((packed)) bitmap_infoheader;
+} __attribute__((packed)) bitmap_infoheader_t;
 
 
 void start_screenshot(uint32_t initial_delay, uint32_t task_delay);

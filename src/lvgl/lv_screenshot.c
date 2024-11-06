@@ -40,7 +40,7 @@ esp_err_t send_screenshot_to_server(lv_img_dsc_t *snapshot, uint32_t width, uint
 
     // BMP header size calculation
     uint8_t bpp = 24; // Assuming 24-bit BMP
-    uint32_t header_size = sizeof(bitmap_fileheader) + sizeof(bitmap_infoheader);
+    uint32_t header_size = sizeof(bitmap_fileheader_t) + sizeof(bitmap_infoheader_t);
     uint32_t image_size = width * height * (bpp / 8); 
     uint32_t file_size = header_size + image_size;
 
@@ -51,16 +51,16 @@ esp_err_t send_screenshot_to_server(lv_img_dsc_t *snapshot, uint32_t width, uint
         return ESP_FAIL;
     }
 
-    bitmap_fileheader file_header;
-    bitmap_infoheader info_header;
+    bitmap_fileheader_t file_header;
+    bitmap_infoheader_t info_header;
 
     file_header.file_type = 0x4D42; // 'BM'
     file_header.file_size = file_size;
     file_header.reserved1 = 0;
     file_header.reserved2 = 0;
-    file_header.offset_data = sizeof(bitmap_fileheader) + sizeof(bitmap_infoheader);
+    file_header.offset_data = sizeof(bitmap_fileheader_t) + sizeof(bitmap_infoheader_t);
 
-    info_header.size = sizeof(bitmap_infoheader);
+    info_header.size = sizeof(bitmap_infoheader_t);
     info_header.width = width;
     info_header.height = height;
     info_header.planes = 1;
@@ -73,8 +73,8 @@ esp_err_t send_screenshot_to_server(lv_img_dsc_t *snapshot, uint32_t width, uint
     info_header.clr_important = 0;
 
     // Copy the header structures to the BMP data
-    memcpy(bmp_data, &file_header, sizeof(bitmap_fileheader));
-    memcpy(bmp_data + sizeof(bitmap_fileheader), &info_header, sizeof(bitmap_infoheader));
+    memcpy(bmp_data, &file_header, sizeof(bitmap_fileheader_t));
+    memcpy(bmp_data + sizeof(bitmap_fileheader_t), &info_header, sizeof(bitmap_infoheader_t));
 
     // Convert LVGL image data to BMP format
     uint8_t *pixel_data = bmp_data + header_size;
