@@ -745,32 +745,32 @@ void start_tasks()
       NULL,
       1);      
 
-  // xTaskCreatePinnedToCore(
-  //     sensor_sen55_task,    
-  //     "Sensor SEN55 Task",  
-  //     4096,          
-  //     NULL,           
-  //     1,       
-  //     NULL,       
-  //     1);
+  xTaskCreatePinnedToCore(
+      sensor_sen55_task,    
+      "Sensor SEN55 Task",  
+      4096,          
+      NULL,           
+      1,       
+      NULL,       
+      1);
 
-  // xTaskCreatePinnedToCore(
-  //     sensor_scd41_task,    
-  //     "Sensor SCD41 Task",  
-  //     4096,          
-  //     NULL,           
-  //     1,       
-  //     NULL,       
-  //     1);
+  xTaskCreatePinnedToCore(
+      sensor_scd41_task,    
+      "Sensor SCD41 Task",  
+      4096,          
+      NULL,           
+      1,       
+      NULL,       
+      1);
 
-  // xTaskCreatePinnedToCore(
-  //     brightness_task,
-  //     "Brightness Task",
-  //     4096,
-  //     NULL,
-  //     1,
-  //     NULL,
-  //     1);
+  xTaskCreatePinnedToCore(
+      brightness_task,
+      "Brightness Task",
+      4096,
+      NULL,
+      1,
+      NULL,
+      1);
 
 
 }
