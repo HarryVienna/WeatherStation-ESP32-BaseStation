@@ -18,7 +18,7 @@ void init_style_weatherstation_button_MAIN_DEFAULT(lv_style_t *style) {
 lv_style_t *get_style_weatherstation_button_MAIN_DEFAULT() {
     static lv_style_t *style;
     if (!style) {
-        style = lv_mem_alloc(sizeof(lv_style_t));
+        style = (lv_style_t *)lv_mem_alloc(sizeof(lv_style_t));
         lv_style_init(style);
         init_style_weatherstation_button_MAIN_DEFAULT(style);
     }
@@ -54,4 +54,3 @@ void remove_style(lv_obj_t *obj, int32_t styleIndex) {
     };
     remove_style_funcs[styleIndex](obj);
 }
-

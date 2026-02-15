@@ -14,7 +14,7 @@
 
 #include "config/config.h"
 
-//#define CONFIG_DOUBLE_FB 
+// #define CONFIG_DOUBLE_FB 
 
 #ifdef  CONFIG_DOUBLE_FB
  #define LCD_NUM_FB             2

@@ -7,6 +7,15 @@
 extern "C" {
 #endif
 
+// Screens
+
+enum ScreensEnum {
+    _SCREEN_ID_FIRST = 1,
+    SCREEN_ID_SETUP_SCREEN = 1,
+    SCREEN_ID_WEATHERSTATION_SCREEN = 2,
+    _SCREEN_ID_LAST = 2
+};
+
 typedef struct _objects_t {
     lv_obj_t *setup_screen;
     lv_obj_t *weatherstation_screen;
@@ -108,11 +117,6 @@ typedef struct _objects_t {
 
 extern objects_t objects;
 
-enum ScreensEnum {
-    SCREEN_ID_SETUP_SCREEN = 1,
-    SCREEN_ID_WEATHERSTATION_SCREEN = 2,
-};
-
 void create_screen_setup_screen();
 void tick_screen_setup_screen();
 
@@ -123,7 +127,6 @@ void tick_screen_by_id(enum ScreensEnum screenId);
 void tick_screen(int screen_index);
 
 void create_screens();
-
 
 #ifdef __cplusplus
 }

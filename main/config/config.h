@@ -45,7 +45,7 @@ static const char* DAY_NAMES[7] = { "So", "Mo", "Di", "Mi" , "Do" , "Fr" , "Sa" 
 #define I2C_NUM          I2C_NUM_0
 
 // LCD
-#define LCD_PIXEL_CLOCK_HZ     (18 * 1000 * 1000)
+#define LCD_PIXEL_CLOCK_HZ     (16 * 1000 * 1000)
 
 #define PIN_NUM_HSYNC          GPIO_NUM_39
 #define PIN_NUM_VSYNC          GPIO_NUM_41

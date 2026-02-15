@@ -737,40 +737,42 @@ void start_tasks()
       1);  
 
   xTaskCreatePinnedToCore(
-      sensor_sen55_task,    
-      "Sensor SEN55 Task",  
-      4096,          
-      NULL,           
-      1,       
-      NULL,       
-      1);
-
-  xTaskCreatePinnedToCore(
-      sensor_scd41_task,    
-      "Sensor SCD41 Task",  
-      4096,          
-      NULL,           
-      1,       
-      NULL,       
-      1);
-
-  xTaskCreatePinnedToCore(
-      brightness_task,
-      "Brightness Task",
-      4096,
-      NULL,
-      1,
-      NULL,
-      1);
-
-  xTaskCreatePinnedToCore(
       weather_task,
       "Weather Task",
       16384,
       NULL,
       1,
       NULL,
-      1);
+      1);      
+
+  // xTaskCreatePinnedToCore(
+  //     sensor_sen55_task,    
+  //     "Sensor SEN55 Task",  
+  //     4096,          
+  //     NULL,           
+  //     1,       
+  //     NULL,       
+  //     1);
+
+  // xTaskCreatePinnedToCore(
+  //     sensor_scd41_task,    
+  //     "Sensor SCD41 Task",  
+  //     4096,          
+  //     NULL,           
+  //     1,       
+  //     NULL,       
+  //     1);
+
+  // xTaskCreatePinnedToCore(
+  //     brightness_task,
+  //     "Brightness Task",
+  //     4096,
+  //     NULL,
+  //     1,
+  //     NULL,
+  //     1);
+
+
 }
 
 // -------- LVGL Events --------
@@ -1024,7 +1026,7 @@ void action_event_text_area_hoehe(lv_event_t * e)
     if(event_code == LV_EVENT_FOCUSED) {
 
       lv_obj_clear_flag(objects.keyboard_numeric, LV_OBJ_FLAG_HIDDEN);
-      lv_keyboard_set_textarea(objects.keyboard_numeric, objects.text_area_longitude);
+      lv_keyboard_set_textarea(objects.keyboard_numeric, objects.text_area_hoehe);
 
       lv_obj_set_x(objects.keyboard_numeric, 691);
       lv_obj_set_y(objects.keyboard_numeric, 277);
