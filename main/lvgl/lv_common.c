@@ -58,11 +58,20 @@ int32_t lv_map_float(float x, int32_t min_in, int32_t max_in, int32_t min_out, i
     int32_t delta_in = max_in - min_in;
     int32_t delta_out = max_out - min_out;
 
+    if(delta_in == 0) return min_out;
+
     return (int32_t)(((x - min_in) * delta_out) / delta_in + min_out);
 }
 
 
 float cubicInterpolation(lv_temp_t points[], int numPoints, float x) {
+
+    if (points == NULL || numPoints < 1) {
+        return 0.0f;
+    }
+    if (numPoints == 1) {
+        return points[0].y;
+    }
 
     int i = 0;
     while (i < numPoints - 1 && points[i + 1].x < x) {
@@ -71,6 +80,10 @@ float cubicInterpolation(lv_temp_t points[], int numPoints, float x) {
 
     float x0 = points[i].x;
     float x1 = points[i + 1].x;
+
+    if (x1 == x0) {
+        return (points[i].y + points[i + 1].y) / 2.0f;
+    }
     float y0 = points[i].y;
     float y1 = points[i + 1].y;
 

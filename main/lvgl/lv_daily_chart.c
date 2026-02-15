@@ -100,13 +100,13 @@ void lv_daily_chart_set_data(lv_obj_t * obj, const lv_daily_data *data)
 
     lv_daily_chart_t * chart = (lv_daily_chart_t *)obj;
 
-    float max_temp = DBL_MIN;
-    float min_temp = DBL_MAX;
+    float max_temp = -FLT_MAX;
+    float min_temp = FLT_MAX;
 
     for (int i = 0; i < NUM_DAYS; i++) {
         chart->data_array[i] = data[i];
 
-        if (data[i].high_temp > max_temp) { 
+        if (data[i].high_temp > max_temp) {
             max_temp = data[i].high_temp;
         }
         if (data[i].low_temp < min_temp) {
@@ -114,11 +114,20 @@ void lv_daily_chart_set_data(lv_obj_t * obj, const lv_daily_data *data)
         }
     }
 
-    chart->min_temp = (int32_t)(5.0 * floor(min_temp / 5.0)); // next upper 5 value
-    chart->max_temp = (int32_t)(5.0 * ceil(max_temp / 5.0));  // next lower 5 value
-    chart->ticks_temp = (chart->max_temp - chart->min_temp) / 5 + 1; 
+    chart->min_temp = (int32_t)(5.0 * floor(min_temp / 5.0)); // next lower 5 value
+    chart->max_temp = (int32_t)(5.0 * ceil(max_temp / 5.0));   // next upper 5 value
+
+    if (chart->min_temp == chart->max_temp) {
+        chart->min_temp -= 5;
+        chart->max_temp += 5;
+    }
+
+    chart->ticks_temp = (chart->max_temp - chart->min_temp) / 5 + 1;
     if (chart->ticks_temp == 2) { // e.g. 10° and 15°
         chart->ticks_temp = 6;    // -->  10°, 11°, 12°, 13°, 14°, 15°
+    }
+    if (chart->ticks_temp < 2) {
+        chart->ticks_temp = 2;
     }
 
     chart->max_precipitation = MAX_DAILY_PRECIPITATION;  // Precipitation is fix
@@ -294,7 +303,9 @@ static void draw_daily_x_ticks(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
 
         char day_name[4];
         struct tm dt = chart->data_array[i].dt;
-        sprintf(day_name, "%s", DAY_NAMES[dt.tm_wday]);
+        int wday = dt.tm_wday;
+        if (wday < 0 || wday > 6) wday = 0;
+        snprintf(day_name, sizeof(day_name), "%s", DAY_NAMES[wday]);
 
         part_draw_dsc.label_dsc = &label_dsc;
         part_draw_dsc.text = day_name;

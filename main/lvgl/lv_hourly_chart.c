@@ -99,13 +99,13 @@ void lv_hourly_chart_set_data(lv_obj_t * obj, const lv_hourly_data *data)
 
     lv_hourly_chart_t * chart = (lv_hourly_chart_t *)obj;
 
-    float max_temp = DBL_MIN;
-    float min_temp = DBL_MAX;
+    float max_temp = -FLT_MAX;
+    float min_temp = FLT_MAX;
 
     for (int i = 0; i < NUM_HOURS; i++) {
         chart->data_array[i] = data[i];
 
-        if (data[i].temp > max_temp) { 
+        if (data[i].temp > max_temp) {
             max_temp = data[i].temp;
         }
 
@@ -114,11 +114,20 @@ void lv_hourly_chart_set_data(lv_obj_t * obj, const lv_hourly_data *data)
         }
     }
 
-    chart->min_temp = (int32_t)(5.0 * floor(min_temp / 5.0)); // next upper 5 value
-    chart->max_temp = (int32_t)(5.0 * ceil(max_temp / 5.0));  // next lower 5 value
-    chart->ticks_temp = (chart->max_temp - chart->min_temp) / 5 + 1; 
+    chart->min_temp = (int32_t)(5.0 * floor(min_temp / 5.0)); // next lower 5 value
+    chart->max_temp = (int32_t)(5.0 * ceil(max_temp / 5.0));   // next upper 5 value
+
+    if (chart->min_temp == chart->max_temp) {
+        chart->min_temp -= 5;
+        chart->max_temp += 5;
+    }
+
+    chart->ticks_temp = (chart->max_temp - chart->min_temp) / 5 + 1;
     if (chart->ticks_temp == 2) { // e.g. 10° and 15°
         chart->ticks_temp = 6;    // -->  10°, 11°, 12°, 13°, 14°, 15°
+    }
+    if (chart->ticks_temp < 2) {
+        chart->ticks_temp = 2;
     }
 
     chart->max_precipitation = MAX_HOURLY_PRECIPITATION;  // Precipitation is fix
@@ -516,11 +525,22 @@ static void draw_hourly_temp(lv_obj_t * obj, lv_draw_ctx_t * draw_ctx)
         //LV_LOG_WARN("map %f   %f",hourly_temps[i].x, hourly_temps[i].y);
     }
 
+    if (w <= 1) {
+        return;
+    }
+
     // Dynamische Speicherallokation für die Arrays
     lv_coord_t *hourly_temp_values = (lv_coord_t *)heap_caps_malloc(w * sizeof(lv_coord_t), MALLOC_CAP_32BIT | MALLOC_CAP_SPIRAM);
     lv_color_t *hourly_dew_values = (lv_color_t *)heap_caps_malloc(w * sizeof(lv_color_t), MALLOC_CAP_32BIT | MALLOC_CAP_SPIRAM);
 
-    for(uint32_t i = 0; i < w; i++) { 
+    if (hourly_temp_values == NULL || hourly_dew_values == NULL) {
+        heap_caps_free(hourly_temp_values);
+        heap_caps_free(hourly_dew_values);
+        ESP_LOGE(TAG, "Failed to allocate memory for hourly chart");
+        return;
+    }
+
+    for(uint32_t i = 0; i < w; i++) {
         //LV_LOG_WARN("i %d",i );
 
         // map current i to an x in hourly_temps
