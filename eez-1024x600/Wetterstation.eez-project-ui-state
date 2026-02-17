@@ -1,6 +1,6 @@
 {
   "navigation": {
-    "selectedUserPageObject": "[Wetterstation.eez-project]:/userPages/1",
+    "selectedUserPageObject": "[Wetterstation.eez-project]:/userPages/0",
     "selectedActionObject": "[Wetterstation.eez-project]:/actions/10",
     "selectedStyleObject": "[Wetterstation.eez-project]:/lvglStyles/styles/0",
     "selectedFontObject": "[Wetterstation.eez-project]:/fonts/3",
@@ -170,7 +170,8 @@
                       "enableClose": false,
                       "icon": "svg:hierarchy"
                     }
-                  ]
+                  ],
+                  "active": true
                 },
                 {
                   "type": "tabset",
@@ -193,7 +194,7 @@
             {
               "type": "tabset",
               "id": "EDITORS",
-              "weight": 50.197131946845815,
+              "weight": 54.111216199693814,
               "selected": 1,
               "enableDeleteWhenEmpty": false,
               "enableClose": false,
@@ -237,7 +238,7 @@
             {
               "type": "row",
               "id": "#c868a29f-91bb-4ff7-9e6f-e8b94cefd0ac",
-              "weight": 24.965062962925977,
+              "weight": 21.05097871007797,
               "children": [
                 {
                   "type": "tabset",
@@ -252,8 +253,7 @@
                       "enableClose": false,
                       "icon": "svg:properties"
                     }
-                  ],
-                  "active": true
+                  ]
                 },
                 {
                   "type": "tabset",
@@ -1123,8 +1123,8 @@
       },
       "transform": {
         "translate": {
-          "x": -336.12450130221913,
-          "y": -208.77883048365663
+          "x": -438.4102068686254,
+          "y": -233.92168326685976
         },
         "scale": 0.9
       },
@@ -1139,10 +1139,9 @@
         "0": {
           "0": {
             "3": {
-              "5": {
-                "$selected": true
-              }
-            }
+              "5": {}
+            },
+            "$selected": true
           }
         }
       }
